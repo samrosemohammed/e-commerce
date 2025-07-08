@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ThemeToggle } from "./ThemeToggle";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { Bell, Heart, ShoppingCart, User } from "lucide-react";
 
 export const NavBar = () => {
@@ -20,6 +20,10 @@ export const NavBar = () => {
     {
       name: "Contact",
       href: "/contact",
+    },
+    {
+      name: "Sell",
+      href: "/seller",
     },
   ];
   return (

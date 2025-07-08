@@ -7,7 +7,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Moon, Sun } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
+
 export const ThemeToggle = () => {
   const { setTheme } = useTheme();
   return (
