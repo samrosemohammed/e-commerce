@@ -92,7 +92,7 @@ function StarRating({ rating }: { rating: number }) {
 
 export const Testimonials = () => {
   return (
-    <section className="py-16 px-4 bg-background transition-colors">
+    <section className="py-16 px-4 bg-gradient-to-b from-accent to-background">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
@@ -184,17 +184,6 @@ export const Testimonials = () => {
           <div>
             <div className="text-4xl font-bold text-primary mb-2">99%</div>
             <p className="text-muted-foreground">Would Recommend</p>
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="text-center mt-12">
-          <p className="text-muted-foreground mb-4">
-            Join thousands of satisfied customers
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button>Shop Now</Button>
-            <Button variant={"outline"}>Read More Reviews</Button>
           </div>
         </div>
       </div>

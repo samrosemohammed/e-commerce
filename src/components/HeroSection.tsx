@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Testimonials } from "./Testimonials";
 import { Footer } from "./Footer";
+import { CallToAction } from "./CallToAction";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -91,7 +92,7 @@ export const HeroSection = () => {
                 variant="secondary"
                 className="bg-primary text-primary-foreground dark:bg-primary/80 dark:text-primary-foreground"
               >
-                ✨ New Collection 2024
+                ✨ New Collection 2025
               </Badge>
               <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
                 Discover Your
@@ -304,6 +305,7 @@ export const HeroSection = () => {
         </motion.div>
       </div>
       <Testimonials />
+      <CallToAction />
       <Footer />
     </section>
   );

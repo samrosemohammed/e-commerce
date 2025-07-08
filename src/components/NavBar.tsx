@@ -6,6 +6,10 @@ import { Bell, Heart, ShoppingCart, User } from "lucide-react";
 export const NavBar = () => {
   const navItems = [
     {
+      name: "Home",
+      href: "/",
+    },
+    {
       name: "About",
       href: "/about",
     },
@@ -16,10 +20,6 @@ export const NavBar = () => {
     {
       name: "Contact",
       href: "/contact",
-    },
-    {
-      name: "Cart",
-      href: "/cart",
     },
   ];
   return (
