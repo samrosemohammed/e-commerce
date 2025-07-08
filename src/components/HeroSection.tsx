@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Testimonials } from "./Testimonials";
+import { Footer } from "./Footer";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 60 },
@@ -46,7 +48,8 @@ const trendingProducts = [
     name: "Summer Dress",
     price: "$89",
     originalPrice: "$120",
-    image: "/placeholder.svg?height=200&width=150",
+    image:
+      "https://img.kwcdn.com/product/fancy/db633b97-3308-408f-a3cb-b7462d63838f.jpg?imageMogr2/auto-orient%7CimageView2/2/w/800/q/70/format/webp0",
     badge: "30% OFF",
   },
   {
@@ -54,7 +57,7 @@ const trendingProducts = [
     name: "Casual Blazer",
     price: "$156",
     originalPrice: "$195",
-    image: "/placeholder.svg?height=200&width=150",
+    image: "https://content.moss.co.uk/images/extraextralarge/966295964_09.jpg",
     badge: "NEW",
   },
   {
@@ -62,7 +65,8 @@ const trendingProducts = [
     name: "Denim Jacket",
     price: "$78",
     originalPrice: "$98",
-    image: "/placeholder.svg?height=200&width=150",
+    image:
+      "https://static-01.daraz.com.np/p/1e8ee458955a58b5fd6d06e42cc4f54c.jpg",
     badge: "SALE",
   },
 ];
@@ -176,7 +180,7 @@ export const HeroSection = () => {
             <div className="relative">
               <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-pink-400/20 dark:from-primary/30 dark:to-pink-400/30 rounded-3xl" />
               <Image
-                src="/placeholder.svg?height=600&width=500"
+                src="https://whitefoxboutique.com/cdn/shop/files/IMG_7633.jpg"
                 alt="Fashion Model"
                 width={500}
                 height={600}
@@ -235,7 +239,7 @@ export const HeroSection = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {trendingProducts.map((product, index) => (
               <motion.div
                 key={product.id}
@@ -273,6 +277,12 @@ export const HeroSection = () => {
               </motion.div>
             ))}
           </div>
+          <div className="text-center mt-8">
+            <Button size={"lg"}>
+              <ArrowRight className="h-5 w-5 mr-2" />
+              View All Products
+            </Button>
+          </div>
         </motion.div>
 
         {/* Features */}
@@ -293,6 +303,8 @@ export const HeroSection = () => {
           ))}
         </motion.div>
       </div>
+      <Testimonials />
+      <Footer />
     </section>
   );
 };
