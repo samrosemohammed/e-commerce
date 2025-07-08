@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { loginSellerSchema, SellerLoginFormValues } from "@/lib/zodSchemas";
+import { trpc } from "@/lib/trpc";
 
 interface SellerLoginFormProps {
   onSuccess: () => void;
@@ -23,6 +24,8 @@ export function SellerLoginForm({
 }: SellerLoginFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { data } = trpc.hello.useQuery({ name: "World" });
+  console.log("data: ", data);
 
   const {
     register,
