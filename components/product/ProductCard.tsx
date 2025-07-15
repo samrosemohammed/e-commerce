@@ -18,42 +18,52 @@ import {
   SelectValue,
 } from "../ui/select";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { Grid2x2, List } from "lucide-react";
+import { Grid, Grid2x2, List, Menu } from "lucide-react";
 import { useState } from "react";
+import { MobileFilterCategory } from "../MobileFilterCategory";
 
 export const ProductCard = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
 
   return (
     <div className="w-full">
-      <div className="flex justify-end gap-4 mb-4">
-        <Select defaultValue="default">
-          <SelectTrigger className="w-[250px]">
-            <SelectValue placeholder="Sort" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="default">Default</SelectItem>
-            <SelectItem value="price-asc">Price: Low to High</SelectItem>
-            <SelectItem value="price-desc">Price: High to Low</SelectItem>
-          </SelectContent>
-        </Select>
-        <ToggleGroup
-          type="single"
-          value={view}
-          onValueChange={(val) => val && setView(val as "grid" | "list")}
-        >
-          <ToggleGroupItem value="grid" aria-label="Grid View">
-            <Grid2x2 className="w-5 h-5" />
-          </ToggleGroupItem>
-          <ToggleGroupItem value="list" aria-label="List View">
-            <List className="w-5 h-5" />
-          </ToggleGroupItem>
-        </ToggleGroup>
+      <div className="flex justify-between items-center mb-4">
+        <div className="lg:hidden">
+          {/* <Menu className="lg:hidden block" /> */}
+          <MobileFilterCategory />
+        </div>
+        <div />
+        <div className="flex gap-2 sm:gap-4">
+          <Select defaultValue="default">
+            <SelectTrigger className="w-[150px] sm:w-[250px]">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent align="end">
+              <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="price-asc">Price: Low to High</SelectItem>
+              <SelectItem value="price-desc">Price: High to Low</SelectItem>
+            </SelectContent>
+          </Select>
+          <ToggleGroup
+            type="single"
+            value={view}
+            onValueChange={(val) => val && setView(val as "grid" | "list")}
+          >
+            <ToggleGroupItem value="grid" aria-label="Grid View">
+              <Grid2x2 className="w-5 h-5" />
+            </ToggleGroupItem>
+            <ToggleGroupItem value="list" aria-label="List View">
+              <List className="w-5 h-5" />
+            </ToggleGroupItem>
+          </ToggleGroup>
+        </div>
       </div>
 
       <div
         className={
-          view === "grid" ? "grid grid-cols-3 gap-8" : "flex flex-col gap-8"
+          view === "grid"
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            : "flex flex-col gap-8"
         }
       >
         {products.map((product, i) => (

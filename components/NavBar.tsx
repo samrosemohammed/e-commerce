@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 
 export const NavBar = () => {
   return (
-    <div className="shadow py-4 sticky top-0 bg-white z-[999]">
+    <div className="shadow px-4 py-4 sticky top-0 bg-white z-[10]">
       <nav className="max-w-screen-2xl mx-auto flex items-center justify-between">
         <Link href={"/"}>Kapada Pasal</Link>
         <ul className="flex items-center gap-2">
