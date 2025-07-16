@@ -18,6 +18,7 @@ import { Label } from "./ui/label";
 import { Checkbox } from "./ui/checkbox";
 import { Slider } from "./ui/slider";
 import { useState } from "react";
+import { FilterCategoryContent } from "./FilterCategoryContent";
 
 export const MobileFilterCategory = () => {
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
@@ -50,75 +51,10 @@ export const MobileFilterCategory = () => {
         <Menu />
       </SheetTrigger>
       <SheetContent side="left" className="p-4 z-[999] overflow-y-auto">
-        {/* <SheetHeader>
-          <SheetTitle>Are you absolutely sure?</SheetTitle>
-          <SheetDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </SheetDescription>
-        </SheetHeader> */}
-        <h2 className="text-lg font-semibold mb-4">Filter by Category</h2>
-
-        <Accordion
-          type="multiple"
-          className="w-full"
-          defaultValue={[
-            "trending",
-            "gender",
-            "clothes",
-            "brand",
-            "availability",
-            "price",
-          ]}
-        >
-          {categories.map((section) => (
-            <AccordionItem
-              key={section.title.toLowerCase()}
-              value={section.title.toLowerCase()}
-            >
-              <AccordionTrigger className="text-base font-medium">
-                {section.title}
-              </AccordionTrigger>
-              <AccordionContent>
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  {section.items.map((item) => (
-                    <Label
-                      key={item}
-                      className="flex items-center gap-2 font-normal cursor-pointer hover:text-foreground/80"
-                    >
-                      <Checkbox />
-                      {item}
-                    </Label>
-                  ))}
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-          {/* Price range filter */}
-          <AccordionItem value="price">
-            <AccordionTrigger className="text-base font-medium">
-              Price
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="pt-4">
-                <Slider
-                  defaultValue={priceRange}
-                  min={0}
-                  max={1000}
-                  step={10}
-                  value={priceRange}
-                  onValueChange={(value: [number, number]) =>
-                    setPriceRange(value)
-                  }
-                />
-                <div className="flex justify-between text-sm mt-2 text-muted-foreground">
-                  <span>${priceRange[0]}</span>
-                  <span>${priceRange[1]}</span>
-                </div>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+        <SheetHeader className="hidden">
+          <SheetTitle>Filter Category</SheetTitle>
+        </SheetHeader>
+        <FilterCategoryContent />
       </SheetContent>
     </Sheet>
   );

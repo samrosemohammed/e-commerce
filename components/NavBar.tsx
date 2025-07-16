@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { Search, ShoppingCart, User } from "lucide-react";
 import { Input } from "./ui/input";
+import { UserDropDown } from "./UserDropDown";
 
 export const NavBar = () => {
   return (
@@ -22,11 +23,7 @@ export const NavBar = () => {
               <ShoppingCart />
             </Link>
           </Button>
-          <Button variant={"ghost"} asChild>
-            <Link href={"/user"}>
-              <User />
-            </Link>
-          </Button>
+          <UserDropDown />
         </ul>
       </nav>
     </div>
