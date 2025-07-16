@@ -1,7 +1,4 @@
 "use client";
-import { signIn } from "next-auth/react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,51 +10,57 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Github, Loader2, Mail } from "lucide-react";
+import { SignupFormData, signupSchema } from "@/lib/zodSchemas";
+import { trpc } from "@/server/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Eye, EyeOff, Github, Mail } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { LoginFormData, loginSchema } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 export default function Page() {
-  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const {
     register,
-    formState: { errors, isSubmitting },
     handleSubmit,
+    formState: { errors, isSubmitting },
   } = useForm({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(signupSchema),
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const signup = trpc.authRouter.signup.useMutation({
+    onSuccess: (data) => {
+      router.push("/login");
+      console.log(data);
+    },
+    onError: (err) => {
+      console.log(err);
+    },
   });
 
-  const onSubmit = async (data: LoginFormData) => {
-    const res = await signIn("credentials", {
-      redirect: false,
-      email: data.email,
-      password: data.password,
-    });
-    if (res?.ok) {
-      router.push("/");
-    } else {
-      console.log("Invalid email or password");
-    }
+  const onSubmit = async (data: SignupFormData) => {
+    await signup.mutateAsync(data);
   };
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-2xl font-bold">Login</CardTitle>
-          <CardDescription>
-            Enter your email and password to access your account.
-          </CardDescription>
+          <CardTitle className="text-2xl font-bold">Sign Up</CardTitle>
+          <CardDescription>Create your account to get started.</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <form action="" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {signup.error && (
+            <p className="text-sm text-center text-red-500">
+              {signup.error.message}
+            </p>
+          )}
           <CardContent className="grid gap-4">
             <div>
               <Button
                 variant="outline"
-                className="flex items-center gap-2 bg-transparent w-full"
+                className="w-full flex items-center gap-2 bg-transparent"
               >
                 <Mail className="h-4 w-4" />
                 Google
@@ -113,26 +116,45 @@ export default function Page() {
                   {errors.password.message}
                 </p>
               )}
-              <Link
-                href="#"
-                className="text-sm underline text-right"
-                prefetch={false}
-              >
-                Forgot password?
-              </Link>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <div className="relative">
+                <Input
+                  {...register("confirmPassword")}
+                  id="confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                  onClick={() => setShowConfirmPassword((prev) => !prev)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </Button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="text-sm text-red-400">
+                  {errors.confirmPassword.message}
+                </p>
+              )}
             </div>
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button disabled={isSubmitting} type="submit" className="w-full">
-              {isSubmitting ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : null}
-              Sign in
+              {isSubmitting ? "Signing up..." : "Sign Up"}
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              {"Don't have an account? "}
-              <Link href="/signup" className="underline" prefetch={false}>
-                Sign up
+              {"Already have an account? "}
+              <Link href="/login" className="underline" prefetch={false}>
+                Login
               </Link>
             </p>
           </CardFooter>

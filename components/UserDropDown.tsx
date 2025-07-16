@@ -16,10 +16,12 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Link from "next/link";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
+import { LogOutDropDownItem } from "./LogOutButton";
 
-export const UserDropDown = () => {
-  const isLoggedIn = false; // Replace this with your actual auth logic
-
+export const UserDropDown = async () => {
+  const session = await getServerSession(authOptions);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -28,7 +30,7 @@ export const UserDropDown = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        {isLoggedIn ? (
+        {session?.user ? (
           <>
             <DropdownMenuItem asChild>
               <Link href="/profile" className="flex items-center gap-2">
@@ -54,10 +56,7 @@ export const UserDropDown = () => {
                 Settings
               </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex items-center gap-2">
-              <LogOut className="w-4 h-4" />
-              Logout
-            </DropdownMenuItem>
+            <LogOutDropDownItem />
           </>
         ) : (
           <>
