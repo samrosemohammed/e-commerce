@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
     <SidebarProvider>
       <AppSideBar />
       <main className="w-full">
-        <header className="border-b flex items-center justify-between px-6 py-2">
+        <header className="border-b flex items-center justify-between px-4 md:px-6 py-2">
           <SidebarTrigger />
           <nav className="flex items-center justify-center gap-4">
             <div className="relative hidden lg:block">
@@ -39,7 +39,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             </Avatar>
           </nav>
         </header>
-        <div className="px-6 py-4">{children}</div>
+        <div className="px-4 md:px-6 py-4">{children}</div>
       </main>
     </SidebarProvider>
   );
