@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Bell, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function AdminLayout({ children }: PropsWithChildren) {
   return (
@@ -30,6 +31,7 @@ export default function AdminLayout({ children }: PropsWithChildren) {
             <Button variant={"ghost"}>
               <Bell />
             </Button>
+            <ThemeToggle />
             <Avatar className="rounded-lg">
               <AvatarImage
                 src="https://github.com/evilrabbit.png"

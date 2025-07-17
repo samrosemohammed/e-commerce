@@ -31,7 +31,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { Check, ChevronDown } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData, TValue> {
@@ -154,57 +161,85 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-4 py-4">
-        <div className="flex items-center space-x-2">
-          <span className="text-sm">Rows per page:</span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1"
-              >
-                {table.getState().pagination.pageSize}
-                <ChevronDown className="text-muted-foreground w-4 h-4 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start">
-              {[5, 10, 20, 30, 50].map((pageSize) => (
-                <DropdownMenuItem
-                  key={pageSize}
-                  onSelect={() => table.setPageSize(pageSize)}
-                  className={cn(
-                    "cursor-pointer flex items-center justify-between",
-                    table.getState().pagination.pageSize === pageSize &&
-                      "font-medium"
-                  )}
-                >
-                  {pageSize}
-                  {table.getState().pagination.pageSize === pageSize && (
-                    <Check className="ml-2 h-4 w-4 text-primary" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+      <div className="flex items-center justify-between space-x-4 py-4">
+        <div className="text-muted-foreground">
+          Selected {table.getSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} rows
         </div>
-        <div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
-          >
-            Previous
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
-          >
-            Next
-          </Button>
+        <div className="flex justify-between gap-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-sm">Rows per page:</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-1"
+                >
+                  {table.getState().pagination.pageSize}
+                  <ChevronDown className="text-muted-foreground w-4 h-4 ml-1" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                {[5, 10, 20, 30, 50].map((pageSize) => (
+                  <DropdownMenuItem
+                    key={pageSize}
+                    onSelect={() => table.setPageSize(pageSize)}
+                    className={cn(
+                      "cursor-pointer flex items-center justify-between",
+                      table.getState().pagination.pageSize === pageSize &&
+                        "font-medium"
+                    )}
+                  >
+                    {pageSize}
+                    {table.getState().pagination.pageSize === pageSize && (
+                      <Check className="ml-2 h-4 w-4 text-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Pagination controls */}
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronsLeft />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeft />
+            </Button>
+            <span className="text-sm">
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
+              {table.getPageCount()}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronRight />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronsRight />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

@@ -41,3 +41,11 @@ export const signupSchema = z
     path: ["confirmPassword"],
   });
 export type SignupFormData = z.infer<typeof signupSchema>;
+
+export const categorySchema = z.object({
+  categories: z
+    .array(z.string().min(1, "Category name is required"))
+    .min(1, "At least one category is required"),
+});
+
+export type CategoryFormData = z.infer<typeof categorySchema>;
