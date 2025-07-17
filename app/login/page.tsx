@@ -1,5 +1,5 @@
 "use client";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { LoginFormData, loginSchema } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
+import bcrypt from "bcryptjs";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
@@ -36,8 +37,17 @@ export default function Page() {
       email: data.email,
       password: data.password,
     });
+
     if (res?.ok) {
-      router.push("/");
+      const session = await getSession();
+      const role = session?.user?.role;
+      console.log(role);
+
+      if (role === "admin") {
+        router.push("/dashboard");
+      } else {
+        router.push("/");
+      }
     } else {
       console.log("Invalid email or password");
     }
