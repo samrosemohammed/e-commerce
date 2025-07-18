@@ -21,7 +21,7 @@ const items = [
   },
   {
     title: "Product",
-    url: "/product",
+    url: "/admin-product",
     icon: Inbox,
   },
   {
@@ -30,8 +30,8 @@ const items = [
     icon: Calendar,
   },
   {
-    title: "Search",
-    url: "#",
+    title: "Brand",
+    url: "/brand",
     icon: Search,
   },
   {

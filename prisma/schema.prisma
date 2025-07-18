@@ -48,6 +48,7 @@ model User {
   accounts       Account[]
   sessions       Session[]
   categories     Category[]
+  brands         Brand[]
 }
 
 model VerificationRequest {
@@ -61,17 +62,28 @@ model VerificationRequest {
   @@unique([identifier, token])
 }
 
-enum CategoryStatus {
+enum Status {
   active
   inactive
 }
 
 model Category {
-  id          String         @id @default(cuid())
-  name        String         @unique
-  status      CategoryStatus @default(active)
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  id          String   @id @default(cuid())
+  name        String   @unique
+  status      Status   @default(active)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  createdById String
+
+  createdBy User @relation(fields: [createdById], references: [id])
+}
+
+model Brand {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  status      Status   @default(active)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   createdById String
 
   createdBy User @relation(fields: [createdById], references: [id])

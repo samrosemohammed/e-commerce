@@ -1,5 +1,10 @@
 import { protectedProcedure, router } from "../trpc";
-import { categorySchema, updateCategorySchema } from "@/lib/zodSchemas";
+import {
+  brandSchema,
+  categorySchema,
+  updateBrandSchema,
+  updateCategorySchema,
+} from "@/lib/zodSchemas";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -20,6 +25,22 @@ export const adminRouter = router({
 
       return created;
     }),
+  createBrand: protectedProcedure
+    .input(brandSchema)
+    .mutation(async ({ ctx, input }) => {
+      const { brands } = input;
+      const userId = ctx.user.id;
+
+      const created = await prisma.brand.createMany({
+        data: brands.map((name) => ({
+          name: name.toLowerCase(),
+          createdById: userId,
+        })),
+        skipDuplicates: true,
+      });
+
+      return created;
+    }),
   getCategories: protectedProcedure.query(async ({ ctx }) => {
     const categories = await prisma.category.findMany({
       where: {
@@ -32,6 +53,13 @@ export const adminRouter = router({
 
     return categories;
   }),
+  getBrands: protectedProcedure.query(async ({ ctx }) => {
+    return prisma.brand.findMany({
+      where: { createdById: ctx.user.id },
+      orderBy: { name: "asc" },
+    });
+  }),
+
   deleteCategories: protectedProcedure
     .input(z.object({ ids: z.array(z.string()) }))
     .mutation(async ({ input }) => {
@@ -44,6 +72,16 @@ export const adminRouter = router({
       });
       return deleted;
     }),
+  deleteBrands: protectedProcedure
+    .input(z.object({ ids: z.array(z.string()) }))
+    .mutation(async ({ input }) => {
+      console.log("Deleting brands with IDs:", input.ids); // DEBUG
+      const deleted = await prisma.brand.deleteMany({
+        where: { id: { in: input.ids } },
+      });
+      return deleted;
+    }),
+
   updateCategory: protectedProcedure
     .input(updateCategorySchema)
     .mutation(async ({ input }) => {
@@ -54,6 +92,15 @@ export const adminRouter = router({
           name: name.toLowerCase(),
           status,
         },
+      });
+    }),
+  updateBrand: protectedProcedure
+    .input(updateBrandSchema)
+    .mutation(async ({ input }) => {
+      const { id, name, status } = input;
+      return prisma.brand.update({
+        where: { id },
+        data: { name: name.toLowerCase(), status },
       });
     }),
 });

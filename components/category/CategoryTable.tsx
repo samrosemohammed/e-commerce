@@ -1,12 +1,25 @@
 "use client";
 import { trpc } from "@/server/client";
 import { columns } from "./Columns";
-import { DataTable } from "./DataTable";
+
 import { Loader2 } from "lucide-react";
+import { DataTable } from "../DataTable";
+import { toast } from "sonner";
 
 export const CategoryTable = () => {
+  const utils = trpc.useUtils();
   const { data, isLoading, isError } =
     trpc.adminRouter.getCategories.useQuery();
+  const { mutate: deleteCategories } =
+    trpc.adminRouter.deleteCategories.useMutation({
+      onSuccess: () => {
+        toast.success("Categories deleted");
+        utils.adminRouter.getCategories.invalidate();
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    });
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40">
@@ -21,5 +34,11 @@ export const CategoryTable = () => {
     );
   }
 
-  return <DataTable columns={columns} data={data} />;
+  return (
+    <DataTable
+      columns={columns}
+      data={data}
+      onDelete={(ids) => deleteCategories({ ids })}
+    />
+  );
 };

@@ -1,5 +1,5 @@
-import { CategoryTable } from "@/components/category/CategoryTable";
-import { CategoryForm } from "@/components/category/CategorytForm";
+import { BrandForm } from "@/components/brand/BrandForm";
+import { BrandTable } from "@/components/brand/BrandTable";
 import {
   Card,
   CardContent,
@@ -8,21 +8,21 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default async function CategoryPage() {
+export default async function BrandPage() {
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <CategoryForm />
+        <BrandForm />
       </div>
       <Card>
         <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl">Category</CardTitle>
+          <CardTitle className="text-2xl">Brand</CardTitle>
           <CardDescription>
-            All the list of categroy that you have created.
+            All the list of brand that you have created.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <CategoryTable />
+          <BrandTable />
         </CardContent>
       </Card>
     </div>

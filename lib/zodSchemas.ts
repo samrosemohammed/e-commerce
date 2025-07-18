@@ -56,3 +56,17 @@ export const updateCategorySchema = z.object({
   status: z.enum(["active", "inactive"]),
 });
 export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;
+
+export const brandSchema = z.object({
+  brands: z
+    .array(z.string().min(1, "Category name is required"))
+    .min(1, "At least one category is required"),
+});
+export type BrandFormData = z.infer<typeof brandSchema>;
+
+export const updateBrandSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Name is required"),
+  status: z.enum(["active", "inactive"]),
+});
+export type UpdateBrandInput = z.infer<typeof updateBrandSchema>;

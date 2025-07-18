@@ -21,16 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "../ui/button";
-import { useState } from "react";
-import { Input } from "../ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+
 import {
   Check,
   ChevronDown,
@@ -42,31 +33,34 @@ import {
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/client";
 import { toast } from "sonner";
+import { useState } from "react";
+import { Input } from "./ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Button } from "./ui/button";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  onDelete?: (ids: string[]) => void;
 }
 
 export function DataTable<TData extends { id: string }, TValue>({
   columns,
   data,
+  onDelete,
 }: DataTableProps<TData, TValue>) {
   const utils = trpc.useUtils();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
-  const { mutate: deleteCategories } =
-    trpc.adminRouter.deleteCategories.useMutation({
-      onSuccess: () => {
-        toast.success("Data Deleted Successfully.");
-        utils.adminRouter.getCategories.invalidate();
-      },
-      onError: (err) => {
-        toast.error(err.message);
-      },
-    });
+
   const table = useReactTable({
     data,
     columns,
@@ -94,7 +88,11 @@ export function DataTable<TData extends { id: string }, TValue>({
     if (selectedIds.length === 0) return;
 
     if (confirm("Are you sure you want to delete the selected categories?")) {
-      deleteCategories({ ids: selectedIds });
+      if (onDelete) {
+        onDelete(selectedIds);
+      } else {
+        toast.error("Something went wrong !!");
+      }
     }
   };
 
