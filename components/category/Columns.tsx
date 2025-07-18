@@ -12,15 +12,24 @@ import {
 import { Button } from "../ui/button";
 import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
+import { trpc } from "@/server/client";
+import { toast } from "sonner";
+import { EditCategoryForm } from "./EditCategoryForm";
 
-export type Payment = {
+export type Category = {
   id: string;
-  amount: number;
-  status: "pending" | "processing" | "success" | "failed";
-  email: string;
+  name: string;
+  status: "active" | "inactive"; // update if other statuses exist
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const capitalizeWords = (str: string) => {
+  return str.replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+export const columns: ColumnDef<Category>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -44,41 +53,46 @@ export const columns: ColumnDef<Payment>[] = [
     enableHiding: false,
   },
   {
+    accessorKey: "name",
+    header: "Name",
+    cell: ({ row }) => {
+      const name = row.getValue("name") as string;
+      return <div>{capitalizeWords(name)}</div>;
+    },
+  },
+  {
     accessorKey: "status",
     header: "Status",
   },
   {
-    accessorKey: "email",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Email
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-  },
-  {
-    accessorKey: "amount",
-    header: () => <div className="text-right">Amount</div>,
+    accessorKey: "createdAt",
+    header: "Created At",
     cell: ({ row }) => {
-      const amount = parseFloat(row.getValue("amount"));
-      const formatted = new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-      }).format(amount);
-
-      return <div className="text-right font-medium">{formatted}</div>;
+      const date = new Date(row.getValue("createdAt"));
+      return <div>{date.toLocaleDateString()}</div>;
     },
   },
   {
     id: "actions",
     cell: ({ row }) => {
-      const payment = row.original;
+      const category = row.original;
+      const utils = trpc.useUtils();
 
+      // useMutation inside a cell is OK
+      const { mutate: deleteCategories } =
+        trpc.adminRouter.deleteCategories.useMutation({
+          onSuccess: () => {
+            toast.success("Category deleted.");
+            utils.adminRouter.getCategories.invalidate();
+          },
+          onError: (err) => toast.error(err.message),
+        });
+
+      const handleDelete = () => {
+        if (confirm("Are you sure you want to delete this category?")) {
+          deleteCategories({ ids: [category.id] });
+        }
+      };
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -90,13 +104,13 @@ export const columns: ColumnDef<Payment>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(payment.id)}
+              onClick={() => navigator.clipboard.writeText(category.id)}
             >
-              Copy payment ID
+              Copy ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <EditCategoryForm category={category} />
+            <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

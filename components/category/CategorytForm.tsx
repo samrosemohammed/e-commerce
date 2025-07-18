@@ -21,6 +21,7 @@ import { toast } from "sonner";
 
 export const CategoryForm = () => {
   const [open, setOpen] = useState(false);
+  const utils = trpc.useUtils();
   const {
     register,
     formState: { errors },
@@ -34,6 +35,7 @@ export const CategoryForm = () => {
         console.log("Categories created successfully!");
         toast.success("Categories created successfully!");
         setOpen(false); // <-- close the dialog here
+        utils.adminRouter.getCategories.invalidate();
       },
       onError: (err) => {
         toast.error(err.message);

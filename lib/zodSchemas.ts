@@ -49,3 +49,10 @@ export const categorySchema = z.object({
 });
 
 export type CategoryFormData = z.infer<typeof categorySchema>;
+
+export const updateCategorySchema = z.object({
+  id: z.string(),
+  name: z.string().min(1, "Name is required"),
+  status: z.enum(["active", "inactive"]),
+});
+export type UpdateCategoryInput = z.infer<typeof updateCategorySchema>;

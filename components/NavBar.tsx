@@ -3,10 +3,11 @@ import { Button } from "./ui/button";
 import { Search, ShoppingCart, User } from "lucide-react";
 import { Input } from "./ui/input";
 import { UserDropDown } from "./UserDropDown";
+import { ThemeToggle } from "./ThemeToggle";
 
 export const NavBar = async () => {
   return (
-    <div className="shadow px-4 py-4 sticky top-0 bg-white z-[10]">
+    <div className="shadow px-4 py-4 sticky top-0 bg-white dark:bg-background dark:border-b z-[10]">
       <nav className="max-w-screen-2xl mx-auto flex items-center justify-between">
         <Link href={"/"}>Kapada Pasal</Link>
         <ul className="flex items-center gap-2">
@@ -23,6 +24,7 @@ export const NavBar = async () => {
               <ShoppingCart />
             </Link>
           </Button>
+          <ThemeToggle />
           <UserDropDown />
         </ul>
       </nav>
