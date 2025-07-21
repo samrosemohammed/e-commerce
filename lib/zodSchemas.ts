@@ -1,3 +1,4 @@
+import { colors, sizes } from "@/types/product";
 import { z } from "zod";
 export const loginSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
@@ -70,3 +71,25 @@ export const updateBrandSchema = z.object({
   status: z.enum(["active", "inactive"]),
 });
 export type UpdateBrandInput = z.infer<typeof updateBrandSchema>;
+
+export const productSchema = z.object({
+  name: z.string().min(1, "Product name is required"),
+  sku: z.string().optional(),
+  description: z.string().optional(),
+  price: z.coerce.number().gt(0, "Price must be greater than 0"),
+  compareAtPrice: z.coerce.number().nonnegative().optional(),
+  cost: z.coerce.number().nonnegative().optional(),
+  category: z.string().min(1, "Category is required"),
+  brand: z.string().optional(),
+  material: z.string().optional(),
+  gender: z.enum(["unisex", "men", "women", "kids"]),
+  sizes: z.array(z.enum(sizes)).optional(),
+  colors: z.array(z.enum(colors)).optional(),
+  images: z.array(z.string().url()).optional(),
+  quantity: z.coerce.number().int().nonnegative().optional(),
+  weight: z.coerce.number().nonnegative().optional(),
+  tags: z.array(z.string()).optional(),
+  status: z.enum(["draft", "active", "archived"]).default("draft"),
+});
+
+export type ProductFormData = z.infer<typeof productSchema>;

@@ -29,6 +29,7 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trpc } from "@/server/client";
@@ -139,7 +140,7 @@ export function DataTable<TData extends { id: string }, TValue>({
             disabled={table.getSelectedRowModel().rows.length === 0}
             onClick={handleDeleteSelected}
           >
-            Delete Selected
+            <Trash2 />
           </Button>
         </div>
       </div>

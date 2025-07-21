@@ -23,3 +23,10 @@ export const validatePassword = async (
   const isMatch = await bcrypt.compare(inputPassword, storedHash);
   return isMatch;
 };
+
+export const capitalizeWords = (str: string): string => {
+  return str
+    .split(/\s+/) // handles multiple spaces or tabs
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};

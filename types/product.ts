@@ -78,3 +78,22 @@ export const products: Product[] = [
       "Stylish and practical leather bag, perfect for carrying your essentials.",
   },
 ];
+
+export const sizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"] as const;
+export type Size = (typeof sizes)[number];
+
+export const colors = [
+  "Black",
+  "White",
+  "Gray",
+  "Navy",
+  "Red",
+  "Blue",
+  "Green",
+  "Pink",
+  "Purple",
+  "Brown",
+  "Beige",
+  "Yellow",
+] as const;
+export type Color = (typeof colors)[number];
