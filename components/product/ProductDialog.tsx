@@ -26,50 +26,18 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { trpc } from "@/server/client";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { ProductFormData, productSchema } from "@/lib/zodSchemas";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
-import { Color, Size } from "@/types/product";
-
-const categories = [
-  "T-Shirts",
-  "Shirts",
-  "Pants",
-  "Jeans",
-  "Dresses",
-  "Skirts",
-  "Jackets",
-  "Sweaters",
-  "Hoodies",
-  "Shorts",
-  "Activewear",
-  "Underwear",
-  "Accessories",
-];
-
-const sizes = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
-
-const colors = [
-  { name: "Black", value: "#000000" },
-  { name: "White", value: "#FFFFFF" },
-  { name: "Gray", value: "#808080" },
-  { name: "Navy", value: "#000080" },
-  { name: "Red", value: "#FF0000" },
-  { name: "Blue", value: "#0000FF" },
-  { name: "Green", value: "#008000" },
-  { name: "Pink", value: "#FFC0CB" },
-  { name: "Purple", value: "#800080" },
-  { name: "Brown", value: "#A52A2A" },
-  { name: "Beige", value: "#F5F5DC" },
-  { name: "Yellow", value: "#FFFF00" },
-];
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ProductFormData, productSchema } from "@/lib/zodSchemas";
+import { trpc } from "@/server/client";
+import { ColorName, colors, genders, sizes } from "@/types/product";
+import { capitalizeWords } from "@/lib/utils";
 
 export const ProductDialog = () => {
   const [open, setOpen] = useState(false);
-  const [selectedSizes, setSelectedSizes] = useState<Size[]>([]);
-  const [selectedColors, setSelectedColors] = useState<Color[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
+  const [selectedColors, setSelectedColors] = useState<ColorName[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState<string[]>([]);
@@ -78,20 +46,20 @@ export const ProductDialog = () => {
   const {
     register,
     handleSubmit,
+    control,
     setValue,
-    watch,
     formState: { errors },
-  } = useForm<ProductFormData>({
+  } = useForm({
     resolver: zodResolver(productSchema),
   });
 
-  const handleSizeToggle = (size: Size) => {
+  const handleSizeToggle = (size: string) => {
     setSelectedSizes((prev) =>
       prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
     );
   };
 
-  const handleColorToggle = (color: Color) => {
+  const handleColorToggle = (color: ColorName) => {
     setSelectedColors((prev) =>
       prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
     );
@@ -125,17 +93,14 @@ export const ProductDialog = () => {
     setImages(images.filter((_, i) => i !== index));
   };
 
-  const onSubmit: SubmitHandler<ProductFormData> = (data: ProductFormData) => {
-    console.log("Submitted Product Data:", data);
-    // setOpen(false);
+  const onSubmit = (data: ProductFormData) => {
+    console.log("data: ", data);
   };
-  // Sync controlled values to RHF
+
   useEffect(() => {
-    setValue("sizes", selectedSizes);
-    setValue("colors", selectedColors);
-    setValue("tags", tags);
-    setValue("images", images);
-  }, [selectedSizes, selectedColors, tags, images]);
+    setValue("productSizes", selectedSizes);
+    setValue("productColors", selectedColors);
+  }, [selectedSizes, selectedColors, setValue]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -162,73 +127,93 @@ export const ProductDialog = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">
-                    Product Name <span className="text-destructive">*</span>
-                  </Label>
+                  <Label htmlFor="product-name">Product Name *</Label>
                   <Input
-                    id="name"
+                    id="product-name"
                     placeholder="e.g., Classic Cotton T-Shirt"
-                    {...register("name")}
+                    {...register("productName")}
                   />
-                  {errors.name && (
-                    <p className="text-destructive">{errors.name.message}</p>
+                  {errors.productName && (
+                    <p className="text-destructive">
+                      {errors.productName.message}
+                    </p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="sku">SKU</Label>
+                  <Label htmlFor="product-code">SKU</Label>
                   <Input
-                    {...register("sku")}
-                    id="sku"
+                    id="product-code"
                     placeholder="e.g., TSH-001-BLK-M"
+                    {...register("productCode")}
                   />
+                  {errors.productCode && (
+                    <p className="text-destructive">
+                      {errors.productCode.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="product-description">Description</Label>
                 <Textarea
-                  id="description"
+                  id="product-description"
                   placeholder="Describe your product features, materials, fit, and care instructions..."
                   className="min-h-[100px]"
-                  {...register("description")}
+                  {...register("productDescription")}
                 />
+                {errors.productDescription && (
+                  <p className="text-destructive">
+                    {errors.productDescription.message}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="price">
-                    Price <span className="text-destructive">*</span>
-                  </Label>
+                  <Label htmlFor="product-price">Price *</Label>
                   <Input
-                    id="price"
+                    id="product-price"
                     type="number"
                     step="0.01"
                     placeholder="29.99"
-                    {...register("price")}
+                    {...register("productPrice")}
                   />
-                  {errors.price && (
-                    <p className="text-destructive">{errors.price.message}</p>
+                  {errors.productPrice && (
+                    <p className="text-destructive">
+                      {errors.productPrice.message}
+                    </p>
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="compare-price">Compare at Price</Label>
+                  <Label htmlFor="produc-compare-price">Compare at Price</Label>
                   <Input
-                    id="compare-price"
+                    id="product-compare-price"
                     type="number"
                     step="0.01"
                     placeholder="39.99"
-                    {...register("compareAtPrice")}
+                    {...register("productComparePrice")}
                   />
+                  {errors.productComparePrice && (
+                    <p className="text-destructive">
+                      {errors.productComparePrice.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="cost">Cost per Item</Label>
+                  <Label htmlFor="product-cost">Cost per Item</Label>
                   <Input
-                    id="cost"
+                    id="product-cost"
                     type="number"
                     step="0.01"
                     placeholder="15.00"
-                    {...register("cost")}
+                    {...register("productCost")}
                   />
+                  {errors.productCost && (
+                    <p className="text-destructive">
+                      {errors.productCost.message}
+                    </p>
+                  )}
                 </div>
               </div>
             </CardContent>
@@ -242,79 +227,102 @@ export const ProductDialog = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">
-                    Category <span className="text-destructive">*</span>
-                  </Label>
-                  <Select onValueChange={(val) => setValue("category", val)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60 overflow-y-auto">
-                      {categoriesData?.map((category) => (
-                        <SelectItem
-                          key={category.id}
-                          value={category.name}
-                          className="capitalize"
-                        >
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.category && (
+                  <Label htmlFor="category">Category *</Label>
+                  <Controller
+                    control={control}
+                    name="productCategoryId"
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value ?? ""}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categoriesData?.map((category) => (
+                            <SelectItem key={category.id} value={category.id}>
+                              {capitalizeWords(category.name)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.productCategoryId && (
                     <p className="text-destructive">
-                      {errors.category.message}
+                      {errors.productCategoryId.message}
                     </p>
                   )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="brand">Brand</Label>
-                  <Select onValueChange={(val) => setValue("brand", val)}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select brand" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {brandsData?.map((brand) => (
-                        <SelectItem
-                          key={brand.id}
-                          value={brand.name}
-                          className="capitalize"
-                        >
-                          {brand.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <Controller
+                    control={control}
+                    name="productBrandId"
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value ?? ""}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select brand" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {brandsData?.map((brand) => (
+                            <SelectItem key={brand.id} value={brand.id}>
+                              {capitalizeWords(brand.name)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
+                  {errors.productBrandId && (
+                    <p className="text-destructive">
+                      {errors.productBrandId.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="material">Material</Label>
-                  <Input id="material" placeholder="e.g., 100% Cotton" />
+                  <Label htmlFor="product-material">Material</Label>
+                  <Input
+                    {...register("productMaterial")}
+                    id="product-material"
+                    placeholder="e.g., 100% Cotton"
+                  />
+                  {errors.productMaterial && (
+                    <p className="text-destructive">
+                      {errors.productMaterial.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="gender">
-                    Gender <span className="text-destructive">*</span>
-                  </Label>
-                  <Select
-                    onValueChange={(val) =>
-                      setValue(
-                        "gender",
-                        val as "unisex" | "men" | "women" | "kids"
-                      )
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select gender" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="unisex">Unisex</SelectItem>
-                      <SelectItem value="men">Men</SelectItem>
-                      <SelectItem value="women">Women</SelectItem>
-                      <SelectItem value="kids">Kids</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <Label htmlFor="gender">Gender</Label>
+                  <Controller
+                    control={control}
+                    name="gender"
+                    render={({ field }) => (
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value ?? ""}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select gender" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {genders.map((gender) => (
+                            <SelectItem key={gender.value} value={gender.value}>
+                              {gender.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  />
                   {errors.gender && (
                     <p className="text-destructive">{errors.gender.message}</p>
                   )}
@@ -332,54 +340,99 @@ export const ProductDialog = () => {
               {/* Sizes */}
               <div className="space-y-2">
                 <Label>Available Sizes</Label>
-                <div className="flex flex-wrap gap-2">
-                  {sizes.map((size) => (
-                    <div key={size} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`size-${size}`}
-                        checked={selectedSizes.includes(size as Size)}
-                        onCheckedChange={() => handleSizeToggle(size as Size)}
-                      />
-                      <Label
-                        htmlFor={`size-${size}`}
-                        className="text-sm font-normal"
-                      >
-                        {size}
-                      </Label>
+                <Controller
+                  control={control}
+                  name="productSizes"
+                  render={({ field }) => (
+                    <div className="flex flex-wrap gap-2">
+                      {sizes.map((size) => {
+                        const isChecked = field.value?.includes(size);
+
+                        return (
+                          <div
+                            key={size}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`size-${size}`}
+                              checked={isChecked}
+                              onCheckedChange={() => {
+                                const newValue = isChecked
+                                  ? field.value.filter(
+                                      (s: string) => s !== size
+                                    )
+                                  : [...(field.value || []), size];
+                                field.onChange(newValue);
+                              }}
+                            />
+                            <Label
+                              htmlFor={`size-${size}`}
+                              className="text-sm font-normal"
+                            >
+                              {size}
+                            </Label>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
+                  )}
+                />
+                {errors.productSizes && (
+                  <p className="text-destructive text-sm">
+                    {errors.productSizes.message as string}
+                  </p>
+                )}
               </div>
 
               {/* Colors */}
               <div className="space-y-2">
                 <Label>Available Colors</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {colors.map((color) => (
-                    <div
-                      key={color.name}
-                      className="flex items-center space-x-2"
-                    >
-                      <Checkbox
-                        id={`color-${color.name}`}
-                        checked={selectedColors.includes(color.name as Color)}
-                        onCheckedChange={() =>
-                          handleColorToggle(color.name as Color)
-                        }
-                      />
-                      <div
-                        className="w-4 h-4 rounded border border-gray-300"
-                        style={{ backgroundColor: color.value }}
-                      />
-                      <Label
-                        htmlFor={`color-${color.name}`}
-                        className="text-sm font-normal"
-                      >
-                        {color.name}
-                      </Label>
+                <Controller
+                  control={control}
+                  name="productColors"
+                  render={({ field }) => (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {colors.map((color) => {
+                        const isChecked = field.value?.includes(color.name);
+
+                        return (
+                          <div
+                            key={color.name}
+                            className="flex items-center space-x-2"
+                          >
+                            <Checkbox
+                              id={`color-${color.name}`}
+                              checked={isChecked}
+                              onCheckedChange={() => {
+                                const newValue = isChecked
+                                  ? field.value.filter(
+                                      (c: string) => c !== color.name
+                                    )
+                                  : [...(field.value || []), color.name];
+                                field.onChange(newValue);
+                              }}
+                            />
+                            <div
+                              className="w-4 h-4 rounded border border-gray-300"
+                              style={{ backgroundColor: color.value }}
+                            />
+                            <Label
+                              htmlFor={`color-${color.name}`}
+                              className="text-sm font-normal"
+                            >
+                              {color.name}
+                            </Label>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))}
-                </div>
+                  )}
+                />
+                {errors.productColors && (
+                  <p className="text-red-500 text-sm">
+                    {errors.productColors.message}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -431,7 +484,17 @@ export const ProductDialog = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="quantity">Stock Quantity</Label>
-                  <Input id="quantity" type="number" placeholder="100" />
+                  <Input
+                    id="quantity"
+                    type="number"
+                    placeholder="100"
+                    {...register("productStockQuantity")}
+                  />
+                  {errors.productStockQuantity && (
+                    <p className="text-destructive">
+                      {errors.productStockQuantity.message}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="weight">Weight (kg)</Label>
@@ -440,7 +503,13 @@ export const ProductDialog = () => {
                     type="number"
                     step="0.01"
                     placeholder="0.25"
+                    {...register("productWeight")}
                   />
+                  {errors.productWeight && (
+                    <p className="text-sm text-red-500">
+                      {errors.productWeight.message}
+                    </p>
+                  )}
                 </div>
               </div>
 

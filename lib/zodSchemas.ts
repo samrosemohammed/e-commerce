@@ -1,4 +1,4 @@
-import { colors, sizes } from "@/types/product";
+import { colorNames, sizes } from "@/types/product";
 import { z } from "zod";
 export const loginSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
@@ -73,23 +73,57 @@ export const updateBrandSchema = z.object({
 export type UpdateBrandInput = z.infer<typeof updateBrandSchema>;
 
 export const productSchema = z.object({
-  name: z.string().min(1, "Product name is required"),
-  sku: z.string().optional(),
-  description: z.string().optional(),
-  price: z.coerce.number().gt(0, "Price must be greater than 0"),
-  compareAtPrice: z.coerce.number().nonnegative().optional(),
-  cost: z.coerce.number().nonnegative().optional(),
-  category: z.string().min(1, "Category is required"),
-  brand: z.string().optional(),
-  material: z.string().optional(),
-  gender: z.enum(["unisex", "men", "women", "kids"]),
-  sizes: z.array(z.enum(sizes)).optional(),
-  colors: z.array(z.enum(colors)).optional(),
-  images: z.array(z.string().url()).optional(),
-  quantity: z.coerce.number().int().nonnegative().optional(),
-  weight: z.coerce.number().nonnegative().optional(),
-  tags: z.array(z.string()).optional(),
-  status: z.enum(["draft", "active", "archived"]).default("draft"),
-});
+  productName: z
+    .string()
+    .min(1, "At least one character")
+    .max(50, "Limit exceed"),
+  productCode: z.string().optional(),
+  productDescription: z.string().optional(),
+  productPrice: z.coerce.number().positive("Must be a positive number"),
+  productCost: z
+    .string()
+    .transform((val) => (val === "" ? undefined : Number(val)))
+    .refine((val) => val === undefined || val > 0, {
+      message: "Must be a positive number",
+    })
+    .optional(),
 
+  productComparePrice: z
+    .string()
+    .transform((val) => (val === "" ? undefined : Number(val)))
+    .refine((val) => val === undefined || val > 0, {
+      message: "Must be a positive number",
+    })
+    .optional(),
+  productCategoryId: z.string({ error: "Category is required" }),
+  productBrandId: z.string({ error: "Brand is required" }),
+  productMaterial: z
+    .string()
+    .transform((val) => (val === "" ? undefined : val))
+    .refine((val) => val === undefined || val.length >= 2, {
+      message: "At least 2 Character",
+    })
+    .optional(),
+  gender: z.string({ error: "Gender is required" }),
+  productSizes: z
+    .array(z.enum(sizes))
+    .min(1, "At least one size must be selected"),
+  productColors: z
+    .array(z.enum(colorNames))
+    .min(1, "At least one color must be selected"),
+  productStockQuantity: z
+    .string()
+    .transform((val) => (val === "" ? undefined : Number(val)))
+    .refine((val) => val === undefined || val > 0, {
+      message: "Must be a positive number",
+    })
+    .optional(),
+  productWeight: z
+    .string()
+    .transform((val) => (val === "" ? undefined : Number(val)))
+    .refine((val) => val === undefined || val > 0, {
+      message: "Weight must be a positive number",
+    })
+    .optional(),
+});
 export type ProductFormData = z.infer<typeof productSchema>;

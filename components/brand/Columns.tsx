@@ -13,6 +13,7 @@ import {
 import { trpc } from "@/server/client";
 import { toast } from "sonner";
 import { EditBrandForm } from "./EditBrandForm";
+import { capitalizeWords } from "@/lib/utils";
 
 export type Brand = {
   id: string;
@@ -22,9 +23,6 @@ export type Brand = {
   updatedAt: string;
   createdById: string;
 };
-
-export const capitalizeWords = (str: string) =>
-  str.replace(/\b\w/g, (c) => c.toUpperCase());
 
 export const brandColumns: ColumnDef<Brand>[] = [
   {
@@ -59,6 +57,9 @@ export const brandColumns: ColumnDef<Brand>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    cell: ({ row }) => (
+      <div>{capitalizeWords(row.getValue("status") as string)}</div>
+    ),
   },
   {
     accessorKey: "createdAt",

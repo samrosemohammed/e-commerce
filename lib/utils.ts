@@ -24,9 +24,8 @@ export const validatePassword = async (
   return isMatch;
 };
 
-export const capitalizeWords = (str: string): string => {
-  return str
-    .split(/\s+/) // handles multiple spaces or tabs
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+export const capitalizeWords = (str: string) =>
+  str
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
-};
