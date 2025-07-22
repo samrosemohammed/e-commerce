@@ -1,4 +1,4 @@
-import { colorNames, sizes } from "@/types/product";
+import { colorNames, sizes, status } from "@/types/product";
 import { z } from "zod";
 export const loginSchema = z.object({
   email: z.email({ message: "Invalid email address" }),
@@ -125,5 +125,7 @@ export const productSchema = z.object({
       message: "Weight must be a positive number",
     })
     .optional(),
+  productTags: z.array(z.string().min(1, "Tags cannot be empty")).optional(),
+  productStatus: z.enum(status),
 });
 export type ProductFormData = z.infer<typeof productSchema>;

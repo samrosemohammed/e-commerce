@@ -31,7 +31,7 @@ import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProductFormData, productSchema } from "@/lib/zodSchemas";
 import { trpc } from "@/server/client";
-import { ColorName, colors, genders, sizes } from "@/types/product";
+import { ColorName, colors, genders, sizes, status } from "@/types/product";
 import { capitalizeWords } from "@/lib/utils";
 
 export const ProductDialog = () => {
@@ -66,8 +66,11 @@ export const ProductDialog = () => {
   };
 
   const handleAddTag = () => {
-    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
+    const trimmedTag = tagInput.trim();
+    if (trimmedTag && !tags.includes(trimmedTag)) {
+      const updatedTags = [...tags, trimmedTag];
+      setTags(updatedTags);
+      setValue("productTags", updatedTags); // use updated value
       setTagInput("");
     }
   };
@@ -513,50 +516,88 @@ export const ProductDialog = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="tags">Tags</Label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {tags.map((tag) => (
-                    <Badge key={tag} variant="secondary" className="px-2 py-1">
-                      {tag}
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="ml-1 h-auto p-0"
-                        onClick={() => handleRemoveTag(tag)}
-                      >
-                        <X className="w-3 h-3" />
+              <Controller
+                control={control}
+                name="productTags"
+                render={({ field }) => (
+                  <div className="space-y-2">
+                    <Label htmlFor="tags">Tags</Label>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {tags.map((tag) => (
+                        <Badge
+                          key={tag}
+                          variant="secondary"
+                          className="px-2 py-1"
+                        >
+                          {tag}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="ml-1 h-auto p-0"
+                            onClick={() => handleRemoveTag(tag)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </Badge>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleAddTag();
+                          }
+                        }}
+                        placeholder="Add a tag..."
+                      />
+                      <Button type="button" onClick={handleAddTag}>
+                        Add
                       </Button>
-                    </Badge>
-                  ))}
-                </div>
-                <div className="flex gap-2">
-                  <Input
-                    value={tagInput}
-                    onChange={(e) => setTagInput(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="Add a tag..."
-                  />
-                  <Button type="button" onClick={handleAddTag}>
-                    Add
-                  </Button>
-                </div>
-              </div>
+                    </div>
+                    {errors.productTags && (
+                      <p className="text-sm text-red-500">
+                        {errors.productTags.message?.toString()}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
 
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select defaultValue="draft">
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="archived">Archived</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Controller
+                name="productStatus"
+                control={control}
+                defaultValue="Draft"
+                render={({ field }) => (
+                  <div className="space-y-2">
+                    <Label htmlFor="status">Status</Label>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      defaultValue="Draft"
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {status.map((s) => (
+                          <SelectItem value={s} key={s}>
+                            {s}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {errors.productStatus && (
+                      <p className="text-red-500 text-sm">
+                        {errors.productStatus.message}
+                      </p>
+                    )}
+                  </div>
+                )}
+              />
             </CardContent>
           </Card>
 
