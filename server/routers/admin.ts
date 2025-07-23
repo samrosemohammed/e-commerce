@@ -2,6 +2,7 @@ import { protectedProcedure, router } from "../trpc";
 import {
   brandSchema,
   categorySchema,
+  productSchema,
   updateBrandSchema,
   updateCategorySchema,
 } from "@/lib/zodSchemas";
@@ -9,6 +10,12 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
 export const adminRouter = router({
+  createProduct: protectedProcedure
+    .input(productSchema)
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.user.id;
+      console.log("Input recieved in the backend: ", input);
+    }),
   createCategory: protectedProcedure
     .input(categorySchema)
     .mutation(async ({ ctx, input }) => {

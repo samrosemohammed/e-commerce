@@ -1,6 +1,6 @@
 "use client";
+import { FileRejection, useDropzone } from "react-dropzone";
 
-import * as React from "react";
 import { Plus, Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -32,26 +32,28 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { useEffect, useState } from "react";
+import { useRef, useCallback, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ProductFormData, productSchema } from "@/lib/zodSchemas";
 import { trpc } from "@/server/client";
-import { ColorName, colors, genders, sizes, status } from "@/types/product";
-import { capitalizeWords } from "@/lib/utils";
-import { useRef } from "react";
+import { colors, genders, sizes, status } from "@/types/product";
+import { capitalizeWords, cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const ProductDialog = () => {
+  const MAX_IMAGES = 10;
+  const MAX_FILE_SIZE_MB = 5;
   const [open, setOpen] = useState(false);
-  const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
-  const [selectedColors, setSelectedColors] = useState<ColorName[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
-  const [images, setImages] = useState<string[]>([]);
+  const [images, setImages] = useState<File[]>([]);
   const { data: categoriesData } = trpc.adminRouter.getCategories.useQuery();
   const { data: brandsData } = trpc.adminRouter.getBrands.useQuery();
+  const { mutate: createProduct } =
+    trpc.adminRouter.createProduct.useMutation();
+
   const {
     register,
     handleSubmit,
@@ -68,6 +70,54 @@ export const ProductDialog = () => {
     },
   });
 
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const validFiles = acceptedFiles.filter(
+        (file) =>
+          (file.type === "image/jpeg" || file.type === "image/png") &&
+          file.size <= MAX_FILE_SIZE_MB * 1024 * 1024
+      );
+
+      const newImages = [...images, ...validFiles].slice(0, MAX_IMAGES);
+      setImages(newImages);
+      console.log("drop file : ", newImages);
+    },
+    [images]
+  );
+
+  const onDropRejected = useCallback((fileRejection: FileRejection[]) => {
+    if (fileRejection.length > 0) {
+      const tooManyFiles = fileRejection.find(
+        (fileRejection) => fileRejection.errors[0].code === "too-many-files"
+      );
+      const fileTooLarge = fileRejection.find(
+        (fileRejection) => fileRejection.errors[0].code === "file-too-large"
+      );
+
+      const invalidFileTypes = fileRejection.find(
+        (fileRejection) => fileRejection.errors[0].code === "file-invalid-type"
+      );
+
+      if (tooManyFiles) toast.error("You can only upload 10 files at a time");
+      if (fileTooLarge) toast.error("File is too large");
+      if (invalidFileTypes) toast.error("Unsupported file format");
+    }
+    console.log("rejected file : ", fileRejection);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    onDropRejected,
+    accept: {
+      "image/jpeg": [],
+      "image/png": [],
+    },
+    maxSize: MAX_FILE_SIZE_MB * 1024 * 1024,
+    multiple: true,
+    maxFiles: MAX_IMAGES,
+    disabled: images.length >= MAX_IMAGES,
+  });
+
   const handleAddTag = () => {
     const trimmedTag = tagInput.trim();
     if (trimmedTag && !tags.includes(trimmedTag)) {
@@ -82,71 +132,19 @@ export const ProductDialog = () => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleImageUpload = () => {
-    if (images.length >= 10) return;
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files) return;
-
-    const allowedTypes = ["image/jpeg", "image/png"];
-    const maxSize = 5 * 1024 * 1024; // 5MB
-
-    let totalImages = images.length;
-    let limitExceeded = false;
-    let sizeExceeded = false;
-
-    Array.from(files).forEach((file) => {
-      if (totalImages >= 10) {
-        limitExceeded = true;
-        return;
-      }
-
-      if (file.size > maxSize) {
-        sizeExceeded = true;
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (typeof event.target?.result === "string") {
-          setImages((prev) => {
-            const updated = [...prev, event.target!.result as string];
-            setValue("productImages", updated);
-            return updated;
-          });
-        }
-      };
-      reader.readAsDataURL(file);
-      totalImages++;
-    });
-
-    if (limitExceeded) {
-      toast.warning("You can only upload up to 10 images.");
-    }
-    if (sizeExceeded) {
-      toast.warning("One or more files exceed the 5MB size limit.");
-    }
-
-    e.target.value = "";
-  };
-
-  const handleRemoveImage = (index: number) => {
-    setImages((prev) => {
-      const updated = prev.filter((_, i) => i !== index);
-      setValue("productImages", updated);
-      return updated;
-    });
+  const handleRemoveImage = (index) => {
+    const updated = [...images];
+    updated.splice(index, 1);
+    setImages(updated);
   };
 
   const handleClearAllImages = () => {
     setImages([]);
-    setValue("productImages", []);
   };
 
-  const onSubmit = (data: ProductFormData) => {
+  const onSubmit = async (data: ProductFormData) => {
     console.log("data: ", data);
+    createProduct(data);
   };
 
   return (
@@ -174,7 +172,9 @@ export const ProductDialog = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="product-name">Product Name *</Label>
+                  <Label htmlFor="product-name">
+                    Product Name <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="product-name"
                     placeholder="e.g., Classic Cotton T-Shirt"
@@ -218,7 +218,9 @@ export const ProductDialog = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="product-price">Price *</Label>
+                  <Label htmlFor="product-price">
+                    Price <span className="text-destructive">*</span>
+                  </Label>
                   <Input
                     id="product-price"
                     type="number"
@@ -274,7 +276,9 @@ export const ProductDialog = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="product-category">Category *</Label>
+                  <Label htmlFor="product-category">
+                    Category <span className="text-destructive">*</span>
+                  </Label>
                   <Controller
                     control={control}
                     name="productCategoryId"
@@ -485,16 +489,17 @@ export const ProductDialog = () => {
           </Card>
 
           {/* Images */}
-          <Card>
+          <Card className="">
             <CardHeader>
               <CardTitle className="text-lg">Product Images</CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {images.map((image, index) => (
                   <div key={index} className="relative group">
                     <img
-                      src={image || "/placeholder.svg"}
+                      src={URL.createObjectURL(image)}
                       alt={`Product ${index + 1}`}
                       className="w-full h-32 object-cover rounded-lg border"
                     />
@@ -509,37 +514,39 @@ export const ProductDialog = () => {
                     </Button>
                   </div>
                 ))}
-                {images.length < 10 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-32 border-dashed bg-transparent flex flex-col items-center justify-center"
-                    onClick={handleImageUpload}
+
+                {images.length < MAX_IMAGES && (
+                  <div
+                    {...getRootProps()}
+                    className={cn(
+                      "h-32 rounded-lg bg-transparent flex flex-col items-center justify-center cursor-pointer transition",
+                      isDragActive
+                        ? "border-solid bg-primary/5"
+                        : "border-2 border-dashed hover:border-primary/20"
+                    )}
                   >
+                    <input {...getInputProps()} />
                     <Upload className="w-6 h-6 mb-2" />
-                    <span className="text-sm">Upload Image</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png"
-                      multiple
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden"
-                    />
-                  </Button>
+                    <span className="text-sm">
+                      {isDragActive ? "Drop the files..." : "Upload files"}
+                    </span>
+                  </div>
                 )}
               </div>
-              {errors.productImages && (
+
+              {errors?.productImages && (
                 <p className="text-destructive">
                   {errors.productImages.message}
                 </p>
               )}
+
               <p className="text-sm text-muted-foreground">
                 Upload up to 10 images. Supported formats:{" "}
                 <span className="font-bold">JPG, PNG</span>. Max size:{" "}
                 <span className="font-bold">5MB</span> each.
               </p>
             </CardContent>
+
             <CardFooter>
               {images.length > 0 && (
                 <Button
