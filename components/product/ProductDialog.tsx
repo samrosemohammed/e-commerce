@@ -38,7 +38,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ProductFormData, productSchema } from "@/lib/zodSchemas";
 import { trpc } from "@/server/client";
 import { colors, genders, sizes, status } from "@/types/product";
-import { capitalizeWords, cn } from "@/lib/utils";
+import { capitalizeWords, cn, useUploadThing } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const ProductDialog = () => {
@@ -51,9 +51,9 @@ export const ProductDialog = () => {
   const [images, setImages] = useState<File[]>([]);
   const { data: categoriesData } = trpc.adminRouter.getCategories.useQuery();
   const { data: brandsData } = trpc.adminRouter.getBrands.useQuery();
-  const { mutate: createProduct } =
+  const { mutate: createProduct, isPending } =
     trpc.adminRouter.createProduct.useMutation();
-
+  const { startUpload, isUploading } = useUploadThing("imageUploader");
   const {
     register,
     handleSubmit,
@@ -66,7 +66,6 @@ export const ProductDialog = () => {
     defaultValues: {
       productSizes: [],
       productColors: [],
-      productImages: [],
     },
   });
 
@@ -144,7 +143,18 @@ export const ProductDialog = () => {
 
   const onSubmit = async (data: ProductFormData) => {
     console.log("data: ", data);
-    createProduct(data);
+    try {
+      const uploadFiles = await startUpload(images);
+      if (!uploadFiles) {
+        toast.error("Failed to upload images");
+        return;
+      }
+      const imageUrls = uploadFiles.map((file) => file.ufsUrl);
+      console.log("Upload image URLs : ", imageUrls);
+    } catch (error) {
+      toast.error("Image upload failed");
+      console.log(error);
+    }
   };
 
   return (
@@ -534,12 +544,6 @@ export const ProductDialog = () => {
                 )}
               </div>
 
-              {errors?.productImages && (
-                <p className="text-destructive">
-                  {errors.productImages.message}
-                </p>
-              )}
-
               <p className="text-sm text-muted-foreground">
                 Upload up to 10 images. Supported formats:{" "}
                 <span className="font-bold">JPG, PNG</span>. Max size:{" "}
@@ -698,7 +702,9 @@ export const ProductDialog = () => {
             <Button type="button" variant="outline">
               Save as Draft
             </Button>
-            <Button type="submit">Create Product</Button>
+            <Button disabled={isUploading || isPending} type="submit">
+              Create Product
+            </Button>
           </div>
         </form>
       </DialogContent>

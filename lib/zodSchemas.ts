@@ -127,20 +127,5 @@ export const productSchema = z.object({
     .optional(),
   productTags: z.array(z.string().min(1, "Tags cannot be empty")).optional(),
   productStatus: z.enum(status),
-  productImages: z
-    .array(
-      z
-        .instanceof(File)
-        .refine(
-          (file) => file.size <= 5 * 1024 * 1024,
-          "File must be 5MB or less"
-        )
-        .refine(
-          (file) => ["image/jpeg", "image/png"].includes(file.type),
-          "Only JPG and PNG files are supported"
-        )
-    )
-    .min(1, "At least one image is required")
-    .max(10, "You can upload up to 10 images only"),
 });
 export type ProductFormData = z.infer<typeof productSchema>;
