@@ -127,5 +127,6 @@ export const productSchema = z.object({
     .optional(),
   productTags: z.array(z.string().min(1, "Tags cannot be empty")).optional(),
   productStatus: z.enum(status),
+  productImages: z.array(z.string()).min(1, "At least one image is required"),
 });
 export type ProductFormData = z.infer<typeof productSchema>;

@@ -24,7 +24,13 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -33,11 +39,14 @@ import { ProductFormData, productSchema } from "@/lib/zodSchemas";
 import { trpc } from "@/server/client";
 import { ColorName, colors, genders, sizes, status } from "@/types/product";
 import { capitalizeWords } from "@/lib/utils";
+import { useRef } from "react";
+import { toast } from "sonner";
 
 export const ProductDialog = () => {
   const [open, setOpen] = useState(false);
   const [selectedSizes, setSelectedSizes] = useState<string[]>([]);
   const [selectedColors, setSelectedColors] = useState<ColorName[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState<string[]>([]);
@@ -48,22 +57,16 @@ export const ProductDialog = () => {
     handleSubmit,
     control,
     setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(productSchema),
+    defaultValues: {
+      productSizes: [],
+      productColors: [],
+      productImages: [],
+    },
   });
-
-  const handleSizeToggle = (size: string) => {
-    setSelectedSizes((prev) =>
-      prev.includes(size) ? prev.filter((s) => s !== size) : [...prev, size]
-    );
-  };
-
-  const handleColorToggle = (color: ColorName) => {
-    setSelectedColors((prev) =>
-      prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
-    );
-  };
 
   const handleAddTag = () => {
     const trimmedTag = tagInput.trim();
@@ -79,31 +82,72 @@ export const ProductDialog = () => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddTag();
-    }
+  const handleImageUpload = () => {
+    if (images.length >= 10) return;
+    fileInputRef.current?.click();
   };
 
-  const handleImageUpload = () => {
-    // Simulate image upload
-    const newImage = `/placeholder.svg?height=200&width=200`;
-    setImages([...images, newImage]);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const allowedTypes = ["image/jpeg", "image/png"];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+
+    let totalImages = images.length;
+    let limitExceeded = false;
+    let sizeExceeded = false;
+
+    Array.from(files).forEach((file) => {
+      if (totalImages >= 10) {
+        limitExceeded = true;
+        return;
+      }
+
+      if (file.size > maxSize) {
+        sizeExceeded = true;
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (typeof event.target?.result === "string") {
+          setImages((prev) => {
+            const updated = [...prev, event.target!.result as string];
+            setValue("productImages", updated);
+            return updated;
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+      totalImages++;
+    });
+
+    if (limitExceeded) {
+      toast.warning("You can only upload up to 10 images.");
+    }
+    if (sizeExceeded) {
+      toast.warning("One or more files exceed the 5MB size limit.");
+    }
+
+    e.target.value = "";
   };
 
   const handleRemoveImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
+    setImages((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      setValue("productImages", updated);
+      return updated;
+    });
+  };
+
+  const handleClearAllImages = () => {
+    setImages([]);
+    setValue("productImages", []);
   };
 
   const onSubmit = (data: ProductFormData) => {
     console.log("data: ", data);
   };
-
-  useEffect(() => {
-    setValue("productSizes", selectedSizes);
-    setValue("productColors", selectedColors);
-  }, [selectedSizes, selectedColors, setValue]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -230,7 +274,7 @@ export const ProductDialog = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category *</Label>
+                  <Label htmlFor="product-category">Category *</Label>
                   <Controller
                     control={control}
                     name="productCategoryId"
@@ -259,7 +303,7 @@ export const ProductDialog = () => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="brand">Brand</Label>
+                  <Label htmlFor="product-brand">Brand</Label>
                   <Controller
                     control={control}
                     name="productBrandId"
@@ -465,17 +509,49 @@ export const ProductDialog = () => {
                     </Button>
                   </div>
                 ))}
+                {images.length < 10 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="h-32 border-dashed bg-transparent flex flex-col items-center justify-center"
+                    onClick={handleImageUpload}
+                  >
+                    <Upload className="w-6 h-6 mb-2" />
+                    <span className="text-sm">Upload Image</span>
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png"
+                      multiple
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </Button>
+                )}
+              </div>
+              {errors.productImages && (
+                <p className="text-destructive">
+                  {errors.productImages.message}
+                </p>
+              )}
+              <p className="text-sm text-muted-foreground">
+                Upload up to 10 images. Supported formats:{" "}
+                <span className="font-bold">JPG, PNG</span>. Max size:{" "}
+                <span className="font-bold">5MB</span> each.
+              </p>
+            </CardContent>
+            <CardFooter>
+              {images.length > 0 && (
                 <Button
                   type="button"
-                  variant="outline"
-                  className="h-32 border-dashed bg-transparent"
-                  onClick={handleImageUpload}
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleClearAllImages}
                 >
-                  <Upload className="w-6 h-6 mb-2" />
-                  <span className="text-sm">Upload Image</span>
+                  Clear All
                 </Button>
-              </div>
-            </CardContent>
+              )}
+            </CardFooter>
           </Card>
 
           {/* Inventory & SEO */}
@@ -486,9 +562,9 @@ export const ProductDialog = () => {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="quantity">Stock Quantity</Label>
+                  <Label htmlFor="product-quantity">Stock Quantity</Label>
                   <Input
-                    id="quantity"
+                    id="product-quantity"
                     type="number"
                     placeholder="100"
                     {...register("productStockQuantity")}
@@ -500,7 +576,7 @@ export const ProductDialog = () => {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Label htmlFor="product-weight">Weight (kg)</Label>
                   <Input
                     id="weight"
                     type="number"
