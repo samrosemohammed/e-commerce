@@ -110,3 +110,24 @@ export type ColorName = (typeof colors)[number]["name"];
 export const colorNames = colors.map((c) => c.name) as ColorName[];
 
 export const status = ["Draft", "Active", "Archived"];
+
+export type AdminProduct = {
+  id: string;
+  name: string;
+  code?: string;
+  price: number;
+  cost?: number;
+  category: {
+    name: string;
+  };
+  brand?: {
+    name: string;
+  };
+  gender?: string;
+  stockQuantity?: number;
+  status: string;
+  images: string[];
+  createdAt: string;
+  updatedAt: string;
+  createdById: string;
+};

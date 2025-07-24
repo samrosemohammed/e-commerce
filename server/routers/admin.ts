@@ -76,6 +76,29 @@ export const adminRouter = router({
 
       return created;
     }),
+  getProduct: protectedProcedure.query(async ({ ctx }) => {
+    const products = await prisma.product.findMany({
+      where: {
+        createdById: ctx.user.id,
+      },
+      orderBy: {
+        name: "asc",
+      },
+      include: {
+        brand: {
+          select: {
+            name: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    return products;
+  }),
   getCategories: protectedProcedure.query(async ({ ctx }) => {
     const categories = await prisma.category.findMany({
       where: {
