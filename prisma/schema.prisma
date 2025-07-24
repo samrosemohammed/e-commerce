@@ -100,9 +100,9 @@ model Product {
   cost          Float? // corresponds to productCost
   comparePrice  Float? // corresponds to productComparePrice
   categoryId    String
-  brandId       String
+  brandId       String?
   material      String? // corresponds to productMaterial
-  gender        String
+  gender        String?
   sizes         String[]
   colors        String[]
   stockQuantity Int? // corresponds to productStockQuantity
@@ -117,5 +117,5 @@ model Product {
 
   createdBy User     @relation(fields: [createdById], references: [id])
   category  Category @relation(fields: [categoryId], references: [id])
-  brand     Brand    @relation(fields: [brandId], references: [id])
+  brand     Brand?    @relation(fields: [brandId], references: [id])
 }

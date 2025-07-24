@@ -80,17 +80,20 @@ export const productSchema = z.object({
   productCode: z.string().optional(),
   productDescription: z.string().optional(),
   productPrice: z.coerce.number().positive("Must be a positive number"),
-  productCost: z.coerce
-    .number()
-    .positive("Must be a positive number")
+  productCost: z
+    .preprocess((val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      return Number(val);
+    }, z.number().positive("Must be a positive number").optional())
     .optional(),
-  productComparePrice: z.coerce
-    .number()
-    .positive("Must be a positive number")
+  productComparePrice: z
+    .preprocess((val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      return Number(val);
+    }, z.number().positive("Must be a positive number").optional())
     .optional(),
-
   productCategoryId: z.string({ error: "Category is required" }),
-  productBrandId: z.string({ error: "Brand is required" }),
+  productBrandId: z.string().optional(),
   productMaterial: z
     .string()
     .transform((val) => (val === "" ? undefined : val))
@@ -98,24 +101,24 @@ export const productSchema = z.object({
       message: "At least 2 Character",
     })
     .optional(),
-  gender: z.string({ error: "Gender is required" }),
-  productSizes: z
-    .array(z.enum(sizes))
-    .min(1, "At least one size must be selected"),
-  productColors: z
-    .array(z.enum(colorNames))
-    .min(1, "At least one color must be selected"),
-  productStockQuantity: z.coerce
-    .number()
-    .positive("Must be a positive number")
+  gender: z.string({ error: "Gender is required" }).optional(),
+  productSizes: z.array(z.enum(sizes)).optional(),
+  productColors: z.array(z.enum(colorNames)).optional(),
+  productStockQuantity: z
+    .preprocess((val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      return Number(val);
+    }, z.number().positive("Must be a positive number").optional())
     .optional(),
 
-  productWeight: z.coerce
-    .number()
-    .positive("Weight must be a positive number")
+  productWeight: z
+    .preprocess((val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      return Number(val);
+    }, z.number().positive("Must be a positive number").optional())
     .optional(),
 
-  productTags: z.array(z.string().min(1, "Tags cannot be empty")).optional(),
+  productTags: z.array(z.string()).optional(),
   productStatus: z.enum(status),
   productImages: z.array(z.string().url()).optional(),
 });

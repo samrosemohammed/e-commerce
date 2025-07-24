@@ -45,7 +45,6 @@ export const ProductDialog = () => {
   const MAX_IMAGES = 10;
   const MAX_FILE_SIZE_MB = 5;
   const [open, setOpen] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [images, setImages] = useState<File[]>([]);
@@ -132,7 +131,7 @@ export const ProductDialog = () => {
     if (trimmedTag && !tags.includes(trimmedTag)) {
       const updatedTags = [...tags, trimmedTag];
       setTags(updatedTags);
-      setValue("productTags", updatedTags); // use updated value
+      setValue("productTags", updatedTags);
       setTagInput("");
     }
   };
@@ -153,16 +152,19 @@ export const ProductDialog = () => {
 
   const onSubmit = async (data: ProductFormData) => {
     try {
-      const uploadFiles = await startUpload(images);
-      if (!uploadFiles) {
-        toast.error("Failed to upload images");
-        return;
+      let imageUrls: string[] = [];
+
+      // Only upload if images array has items
+      if (images && images.length > 0) {
+        const uploadFiles = await startUpload(images);
+        if (!uploadFiles) {
+          toast.error("Failed to upload images");
+          return;
+        }
+        imageUrls = uploadFiles.map((file) => file.ufsUrl);
+        // Update form state with uploaded image URLs
+        setValue("productImages", imageUrls);
       }
-
-      const imageUrls = uploadFiles.map((file) => file.ufsUrl);
-
-      // Set form field before continuing
-      setValue("productImages", imageUrls);
 
       const finalFormData: ProductFormData = {
         ...data,
@@ -439,7 +441,7 @@ export const ProductDialog = () => {
                               checked={isChecked}
                               onCheckedChange={() => {
                                 const newValue = isChecked
-                                  ? field.value.filter(
+                                  ? field.value?.filter(
                                       (s: string) => s !== size
                                     )
                                   : [...(field.value || []), size];
@@ -486,7 +488,7 @@ export const ProductDialog = () => {
                               checked={isChecked}
                               onCheckedChange={() => {
                                 const newValue = isChecked
-                                  ? field.value.filter(
+                                  ? field.value?.filter(
                                       (c: string) => c !== color.name
                                     )
                                   : [...(field.value || []), color.name];

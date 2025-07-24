@@ -15,27 +15,32 @@ export const adminRouter = router({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.id;
       console.log("Input recieved in the backend: ", input);
+      const preparedData = {
+        name: input.productName,
+        code: input.productCode?.trim() === "" ? null : input.productCode,
+        description:
+          input.productDescription?.trim() === ""
+            ? null
+            : input.productDescription,
+        price: input.productPrice,
+        cost: input.productCost ?? null,
+        comparePrice: input.productComparePrice ?? null,
+        categoryId: input.productCategoryId,
+        brandId: input.productBrandId, // Note: your model has brandId non-optional? If nullable, use null here
+        material:
+          input.productMaterial?.trim() === "" ? null : input.productMaterial,
+        gender: input.gender?.trim() === "" ? null : input.gender,
+        sizes: input.productSizes ?? [],
+        colors: input.productColors ?? [],
+        stockQuantity: input.productStockQuantity ?? null,
+        weight: input.productWeight ?? null,
+        tags: input.productTags ?? [],
+        status: input.productStatus,
+        images: input.productImages ?? [],
+        createdById: userId,
+      };
       const product = await prisma.product.create({
-        data: {
-          name: input.productName,
-          code: input.productCode,
-          description: input.productDescription,
-          price: input.productPrice,
-          cost: input.productCost,
-          comparePrice: input.productComparePrice,
-          material: input.productMaterial,
-          gender: input.gender,
-          sizes: input.productSizes,
-          colors: input.productColors,
-          stockQuantity: input.productStockQuantity,
-          weight: input.productWeight,
-          tags: input.productTags,
-          status: input.productStatus,
-          images: input.productImages,
-          brandId: input.productBrandId,
-          categoryId: input.productCategoryId,
-          createdById: userId,
-        },
+        data: preparedData,
       });
       return product;
     }),
