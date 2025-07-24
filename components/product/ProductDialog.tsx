@@ -42,6 +42,7 @@ import { capitalizeWords, cn, useUploadThing } from "@/lib/utils";
 import { toast } from "sonner";
 
 export const ProductDialog = () => {
+  const utils = trpc.useUtils();
   const MAX_IMAGES = 10;
   const MAX_FILE_SIZE_MB = 5;
   const [open, setOpen] = useState(false);
@@ -54,6 +55,7 @@ export const ProductDialog = () => {
     trpc.adminRouter.createProduct.useMutation({
       onSuccess: (data) => {
         toast.success("Product Created");
+        utils.adminRouter.getProduct.invalidate();
         setOpen(false);
         console.log(data);
       },

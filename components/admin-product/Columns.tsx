@@ -1,7 +1,13 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Checkbox } from "../ui/checkbox";
 import { Button } from "../ui/button";
-import { MoreHorizontal } from "lucide-react";
+import {
+  Copy,
+  ExternalLink,
+  MoreHorizontal,
+  SquareArrowOutUpRight,
+  Trash2,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,10 +16,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { capitalizeWords, cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { trpc } from "@/server/client";
 import { AdminProduct } from "@/types/product";
+import { cn } from "@/lib/utils";
 
 export const productColumns: ColumnDef<AdminProduct>[] = [
   {
@@ -39,42 +45,18 @@ export const productColumns: ColumnDef<AdminProduct>[] = [
     enableHiding: false,
   },
 
-  { accessorKey: "name", header: "Name" },
-  { accessorKey: "code", header: "Code" },
-
   {
-    accessorKey: "price",
-    header: () => <div className="text-right">Price</div>,
-    cell: ({ row }) => (
-      <div className="text-right font-medium">
-        ${row.getValue("price").toFixed(2)}
-      </div>
-    ),
+    accessorKey: "name",
+    header: "Name",
   },
-  { accessorKey: "cost", header: "Cost" },
-  { accessorKey: "gender", header: "Gender" },
-  { accessorKey: "stockQuantity", header: "Stock Quantity" },
-
   {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status");
-      return (
-        <span
-          className={cn(
-            "px-2 py-1 rounded text-xs font-medium",
-            status === "Active" && "bg-green-100 text-green-700",
-            status === "Archived" && "bg-red-100 text-red-700",
-            status !== "Active" &&
-              status !== "Archived" &&
-              "bg-gray-200 text-gray-600"
-          )}
-        >
-          {status}
-        </span>
-      );
-    },
+    accessorKey: "code",
+    header: "Code",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">
+        {row.original.code || "—"}
+      </span>
+    ),
   },
   {
     accessorKey: "images",
@@ -93,7 +75,15 @@ export const productColumns: ColumnDef<AdminProduct>[] = [
       );
     },
   },
-  // Optional: if you populate relations with Prisma include
+
+  {
+    header: "Category",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">
+        {row.original.category.name || "—"}
+      </span>
+    ),
+  },
   {
     header: "Brand",
     cell: ({ row }) => (
@@ -103,20 +93,88 @@ export const productColumns: ColumnDef<AdminProduct>[] = [
     ),
   },
   {
-    header: "Category",
+    accessorKey: "gender",
+    header: "Gender",
     cell: ({ row }) => (
       <span className="text-sm text-muted-foreground">
-        {row.original.category.name || "—"}
+        {row.original.gender || "—"}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "cost",
+    header: "Cost",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">
+        {row.original.cost || "—"}
       </span>
     ),
   },
 
   {
-    accessorKey: "createdAt",
-    header: "Created At",
+    accessorKey: "price",
+    header: "Price",
+  },
+
+  {
+    accessorKey: "stockQuantity",
+    header: "Stock Quantity",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">
+        {row.original.stockQuantity || "—"}
+      </span>
+    ),
+  },
+
+  {
+    accessorKey: "status",
+    header: "Status",
     cell: ({ row }) => {
-      const date = new Date(row.getValue("createdAt"));
-      return <div>{date.toLocaleDateString()}</div>;
+      const status = row.getValue("status");
+      return (
+        <span
+          className={cn(
+            "px-2 py-1 rounded text-xs font-medium",
+            status === "Active" && "bg-green-100 text-green-700",
+            status === "Archived" && "bg-red-100 text-red-700",
+            status !== "Active" &&
+              status !== "Archived" &&
+              "bg-gray-200 text-gray-600"
+          )}
+        >
+          {String(status)}
+        </span>
+      );
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem>
+              <ExternalLink /> Visit
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              <Copy />
+              Copy ID
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            {/* <EditBrandForm brand={brand} /> */}
+            <DropdownMenuItem>
+              <Trash2 />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
     },
   },
 ];

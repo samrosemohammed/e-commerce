@@ -145,7 +145,7 @@ export function DataTable<TData extends { id: string }, TValue>({
         </div>
       </div>
       <div className="rounded-md border">
-        <Table className="text-xs">
+        <Table className="text-xs capitalize">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>

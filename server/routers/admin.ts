@@ -139,7 +139,18 @@ export const adminRouter = router({
       });
       return deleted;
     }),
-
+  deleteProduct: protectedProcedure
+    .input(z.object({ ids: z.array(z.string()) }))
+    .mutation(async ({ input, ctx }) => {
+      const deleted = await prisma.product.deleteMany({
+        where: {
+          id: {
+            in: input.ids,
+          },
+        },
+      });
+      return deleted;
+    }),
   updateCategory: protectedProcedure
     .input(updateCategorySchema)
     .mutation(async ({ input }) => {

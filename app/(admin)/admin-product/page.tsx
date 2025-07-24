@@ -16,9 +16,9 @@ export default function Page() {
       </div>
       <Card>
         <CardHeader className="space-y-2">
-          <CardTitle className="text-2xl">Brand</CardTitle>
+          <CardTitle className="text-2xl">Product</CardTitle>
           <CardDescription>
-            All the list of brand that you have created.
+            All the list of product that you have created.
           </CardDescription>
         </CardHeader>
         <CardContent>
