@@ -1,7 +1,7 @@
 "use client";
 import { FileRejection, useDropzone } from "react-dropzone";
 
-import { Plus, Upload, X } from "lucide-react";
+import { Loader2, Plus, Upload, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -52,7 +52,16 @@ export const ProductDialog = () => {
   const { data: categoriesData } = trpc.adminRouter.getCategories.useQuery();
   const { data: brandsData } = trpc.adminRouter.getBrands.useQuery();
   const { mutate: createProduct, isPending } =
-    trpc.adminRouter.createProduct.useMutation();
+    trpc.adminRouter.createProduct.useMutation({
+      onSuccess: (data) => {
+        toast.success("Product Created");
+        setOpen(false);
+        console.log(data);
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    });
   const { startUpload, isUploading } = useUploadThing("imageUploader");
   const {
     register,
@@ -66,6 +75,7 @@ export const ProductDialog = () => {
     defaultValues: {
       productSizes: [],
       productColors: [],
+      productImages: [],
     },
   });
 
@@ -131,7 +141,7 @@ export const ProductDialog = () => {
     setTags(tags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleRemoveImage = (index) => {
+  const handleRemoveImage = (index: number) => {
     const updated = [...images];
     updated.splice(index, 1);
     setImages(updated);
@@ -142,15 +152,25 @@ export const ProductDialog = () => {
   };
 
   const onSubmit = async (data: ProductFormData) => {
-    console.log("data: ", data);
     try {
       const uploadFiles = await startUpload(images);
       if (!uploadFiles) {
         toast.error("Failed to upload images");
         return;
       }
+
       const imageUrls = uploadFiles.map((file) => file.ufsUrl);
-      console.log("Upload image URLs : ", imageUrls);
+
+      // Set form field before continuing
+      setValue("productImages", imageUrls);
+
+      const finalFormData: ProductFormData = {
+        ...data,
+        productImages: imageUrls,
+      };
+
+      console.log("final data: ", finalFormData);
+      createProduct(finalFormData);
     } catch (error) {
       toast.error("Image upload failed");
       console.log(error);
@@ -549,6 +569,11 @@ export const ProductDialog = () => {
                 <span className="font-bold">JPG, PNG</span>. Max size:{" "}
                 <span className="font-bold">5MB</span> each.
               </p>
+              {errors.productImages && (
+                <p className="text-destructive">
+                  {errors.productImages.message}
+                </p>
+              )}
             </CardContent>
 
             <CardFooter>
@@ -703,6 +728,9 @@ export const ProductDialog = () => {
               Save as Draft
             </Button>
             <Button disabled={isUploading || isPending} type="submit">
+              {isPending || isUploading ? (
+                <Loader2 className="animate-spin w-4 h-4" />
+              ) : null}{" "}
               Create Product
             </Button>
           </div>

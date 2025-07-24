@@ -80,21 +80,15 @@ export const productSchema = z.object({
   productCode: z.string().optional(),
   productDescription: z.string().optional(),
   productPrice: z.coerce.number().positive("Must be a positive number"),
-  productCost: z
-    .string()
-    .transform((val) => (val === "" ? undefined : Number(val)))
-    .refine((val) => val === undefined || val > 0, {
-      message: "Must be a positive number",
-    })
+  productCost: z.coerce
+    .number()
+    .positive("Must be a positive number")
+    .optional(),
+  productComparePrice: z.coerce
+    .number()
+    .positive("Must be a positive number")
     .optional(),
 
-  productComparePrice: z
-    .string()
-    .transform((val) => (val === "" ? undefined : Number(val)))
-    .refine((val) => val === undefined || val > 0, {
-      message: "Must be a positive number",
-    })
-    .optional(),
   productCategoryId: z.string({ error: "Category is required" }),
   productBrandId: z.string({ error: "Brand is required" }),
   productMaterial: z
@@ -111,21 +105,18 @@ export const productSchema = z.object({
   productColors: z
     .array(z.enum(colorNames))
     .min(1, "At least one color must be selected"),
-  productStockQuantity: z
-    .string()
-    .transform((val) => (val === "" ? undefined : Number(val)))
-    .refine((val) => val === undefined || val > 0, {
-      message: "Must be a positive number",
-    })
+  productStockQuantity: z.coerce
+    .number()
+    .positive("Must be a positive number")
     .optional(),
-  productWeight: z
-    .string()
-    .transform((val) => (val === "" ? undefined : Number(val)))
-    .refine((val) => val === undefined || val > 0, {
-      message: "Weight must be a positive number",
-    })
+
+  productWeight: z.coerce
+    .number()
+    .positive("Weight must be a positive number")
     .optional(),
+
   productTags: z.array(z.string().min(1, "Tags cannot be empty")).optional(),
   productStatus: z.enum(status),
+  productImages: z.array(z.string().url()).optional(),
 });
 export type ProductFormData = z.infer<typeof productSchema>;

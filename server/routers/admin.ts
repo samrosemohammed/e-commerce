@@ -15,6 +15,29 @@ export const adminRouter = router({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.user.id;
       console.log("Input recieved in the backend: ", input);
+      const product = await prisma.product.create({
+        data: {
+          name: input.productName,
+          code: input.productCode,
+          description: input.productDescription,
+          price: input.productPrice,
+          cost: input.productCost,
+          comparePrice: input.productComparePrice,
+          material: input.productMaterial,
+          gender: input.gender,
+          sizes: input.productSizes,
+          colors: input.productColors,
+          stockQuantity: input.productStockQuantity,
+          weight: input.productWeight,
+          tags: input.productTags,
+          status: input.productStatus,
+          images: input.productImages,
+          brandId: input.productBrandId,
+          categoryId: input.productCategoryId,
+          createdById: userId,
+        },
+      });
+      return product;
     }),
   createCategory: protectedProcedure
     .input(categorySchema)

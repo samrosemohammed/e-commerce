@@ -48,6 +48,7 @@ model User {
   accounts       Account[]
   sessions       Session[]
   categories     Category[]
+  products       Product[]
   brands         Brand[]
 }
 
@@ -68,23 +69,53 @@ enum Status {
 }
 
 model Category {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  status      Status   @default(active)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String    @id @default(cuid())
+  name        String    @unique
+  status      Status    @default(active)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   createdById String
 
   createdBy User @relation(fields: [createdById], references: [id])
 }
 
 model Brand {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  status      Status   @default(active)
+  id          String    @id @default(cuid())
+  name        String    @unique
+  status      Status    @default(active)
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdById String
+  createdBy   User      @relation(fields: [createdById], references: [id])
+}
+
+model Product {
+  id            String   @id @default(cuid())
+  name          String
+  code          String?  @default("")
+  description   String?  @default("")
+  price         Float
+  cost          Float? // corresponds to productCost
+  comparePrice  Float? // corresponds to productComparePrice
+  categoryId    String
+  brandId       String
+  material      String? // corresponds to productMaterial
+  gender        String
+  sizes         String[]
+  colors        String[]
+  stockQuantity Int? // corresponds to productStockQuantity
+  weight        Float? // corresponds to productWeight
+  tags          String[] // corresponds to productTags
+  status        String
+  images        String[]
+
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   createdById String
 
-  createdBy User @relation(fields: [createdById], references: [id])
+  createdBy User     @relation(fields: [createdById], references: [id])
+  category  Category @relation(fields: [categoryId], references: [id])
+  brand     Brand    @relation(fields: [brandId], references: [id])
 }
