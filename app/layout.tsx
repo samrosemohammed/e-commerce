@@ -7,6 +7,7 @@ import { Toaster } from "sonner";
 import { NavBar } from "@/components/NavBar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
+import { CartProvider } from "@/context/CartContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -35,10 +36,13 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Provider>
-            {/* {user?.role !== "admin" && <NavBar />} */}
-            {children}
-          </Provider>
+          <CartProvider>
+            <Provider>
+              {/* {user?.role !== "admin" && <NavBar />} */}
+              <NavBar />
+              {children}
+            </Provider>
+          </CartProvider>
           <Toaster />
         </ThemeProvider>
       </body>

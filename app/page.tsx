@@ -11,7 +11,7 @@ export default async function Home() {
   return (
     <>
       <main>
-        <NavBar />
+        {/* <NavBar /> */}
         <div className="px-4 py-4 sm:py-10 max-w-screen-2xl mx-auto flex gap-8 w-full">
           <FilterCategory />
           <ProductCard />

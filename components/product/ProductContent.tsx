@@ -2,11 +2,11 @@
 import { Product } from "@/types/product";
 import { Badge } from "../ui/badge";
 import {
+  Copy,
   Heart,
   Minus,
   Plus,
   RotateCcw,
-  Share2,
   Shield,
   ShoppingCart,
   Star,
@@ -14,6 +14,9 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "../ui/button";
+import { capitalizeWords } from "@/lib/utils";
+import { toast } from "sonner";
+import { useCart } from "@/context/CartContext";
 
 interface ProductContentProps {
   product: Product;
@@ -31,6 +34,7 @@ export const ProductContent = ({ product }: ProductContentProps) => {
     name,
     code,
   } = product;
+  const { addToCart } = useCart();
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
@@ -40,18 +44,38 @@ export const ProductContent = ({ product }: ProductContentProps) => {
     ? Math.round(((comparePrice - price) / comparePrice) * 100)
     : 0;
 
+  const handleLinkCopy = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copied to clipboard !!");
+  };
+
+  const handleAddToCart = () => {
+    if (!selectedColor || !selectedSize) {
+      toast.error("Please select size and color");
+      return;
+    }
+    addToCart({
+      product,
+      quantity,
+      selectedColor,
+      selectedSize,
+    });
+    toast.success("Add to cart");
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-2 mb-2">
-          {brand && <Badge variant="outline">{brand.name}</Badge>}
-          <Badge variant="outline">{category?.name}</Badge>
+          {brand && (
+            <Badge variant="outline">{capitalizeWords(brand.name)}</Badge>
+          )}
+          <Badge variant="outline">{capitalizeWords(category?.name)}</Badge>
         </div>
         <h1 className="text-3xl font-bold mb-2">{name}</h1>
         {code && <p className="text-sm text-muted-foreground">SKU: {code}</p>}
       </div>
 
-      {/* Rating */}
       <div className="flex items-center gap-2">
         <div className="flex items-center">
           {[...Array(5)].map((_, i) => (
@@ -61,7 +85,6 @@ export const ProductContent = ({ product }: ProductContentProps) => {
         <span className="text-sm text-muted-foreground">(4.8) 124 reviews</span>
       </div>
 
-      {/* Price */}
       <div className="flex items-center gap-3">
         <span className="text-3xl font-bold">${price.toFixed(2)}</span>
         {comparePrice && (
@@ -76,50 +99,41 @@ export const ProductContent = ({ product }: ProductContentProps) => {
         )}
       </div>
 
-      {/* Description */}
       {description && (
         <p className="text-muted-foreground leading-relaxed">{description}</p>
       )}
 
-      {/* Size Selection */}
       {sizes.length > 0 && (
         <div>
           <h3 className="font-semibold mb-3">Size</h3>
           <div className="flex flex-wrap gap-2">
             {sizes.map((size) => (
-              <button
+              <Button
                 key={size}
                 onClick={() => setSelectedSize(size)}
-                className={`px-4 py-2 border rounded-md transition-colors ${
-                  selectedSize === size
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
+                variant={selectedSize === size ? "default" : "outline"}
+                className="transition-colors"
               >
                 {size}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
       )}
 
-      {/* Color Selection */}
       {colors.length > 0 && (
         <div>
           <h3 className="font-semibold mb-3">Color</h3>
           <div className="flex flex-wrap gap-2">
             {colors.map((color) => (
-              <button
+              <Button
                 key={color}
                 onClick={() => setSelectedColor(color)}
-                className={`px-4 py-2 border rounded-md transition-colors ${
-                  selectedColor === color
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-gray-300 hover:border-gray-400"
-                }`}
+                variant={selectedColor === color ? "default" : "outline"}
+                className="transition-colors"
               >
                 {color}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -156,7 +170,7 @@ export const ProductContent = ({ product }: ProductContentProps) => {
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        <Button size="lg" className="flex-1">
+        <Button size="lg" className="flex-1" onClick={handleAddToCart}>
           <ShoppingCart className="w-5 h-5 mr-2" />
           Add to Cart
         </Button>
@@ -171,8 +185,8 @@ export const ProductContent = ({ product }: ProductContentProps) => {
             }`}
           />
         </Button>
-        <Button variant="outline" size="lg">
-          <Share2 className="w-5 h-5" />
+        <Button onClick={handleLinkCopy} variant="outline" size="lg">
+          <Copy className="w-5 h-5" />
         </Button>
       </div>
 
