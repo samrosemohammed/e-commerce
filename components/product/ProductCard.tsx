@@ -9,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { products } from "@/types/product";
 import {
   Select,
   SelectContent,
@@ -18,12 +17,16 @@ import {
   SelectValue,
 } from "../ui/select";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { Grid, Grid2x2, List, Menu } from "lucide-react";
+import { Eye, Grid, Grid2x2, List, Menu, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { MobileFilterCategory } from "../MobileFilterCategory";
+import { trpc } from "@/server/client";
+import Link from "next/link";
 
 export const ProductCard = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
+  const { data: productData } = trpc.adminRouter.getProduct.useQuery();
+  console.log(productData);
 
   return (
     <div className="w-full">
@@ -58,52 +61,90 @@ export const ProductCard = () => {
           </ToggleGroup>
         </div>
       </div>
-
-      <div
-        className={
-          view === "grid"
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
-            : "flex flex-col gap-4"
-        }
-      >
-        {products.map((product, i) => (
-          <Card
-            key={"@" + i}
-            className="transition duration-300 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
-          >
-            <CardHeader className="p-0">
-              <Image
-                src={product.imageUrl || "/placeholder.svg"}
-                alt={product.name}
-                width={200}
-                height={200}
-                className="w-full h-48 object-cover rounded-t-lg"
-              />
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <CardTitle className="text-lg font-semibold mb-2">
-                {product.name}
-              </CardTitle>
-              <CardDescription className="text-sm text-gray-600 mb-3 line-clamp-2">
-                {product.description}
-              </CardDescription>
-              <p className="text-xl font-bold text-gray-900">
-                ${product.price.toFixed(2)}
-              </p>
-            </CardContent>
-            <CardFooter
-              className={
-                view === "list"
-                  ? "flex justify-end items-center gap-2 p-4"
-                  : "flex justify-between p-4 pt-0"
-              }
+      {view === "grid" ? (
+        // Grid View
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {productData?.map((product) => (
+            <div
+              key={product.id}
+              className="border rounded-lg overflow-hidden transition hover:shadow-lg hover:scale-[1.01] cursor-pointer"
             >
-              <Button variant="outline">View Details</Button>
-              <Button>Add to Cart</Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
+              <div>
+                <img
+                  alt={product.name}
+                  src={product.images[0] || "/placeholder.svg"}
+                  className="w-full h-64 aspect-square object-cover rounded-t-lg"
+                />
+              </div>
+              <div className="p-4 space-y-4">
+                <div className="space-y-2">
+                  <h2 className="text-lg font-semibold">{product.name}</h2>
+                  <p className="text-xl font-bold text-primary">
+                    ${product.price.toFixed(2)}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <Button asChild variant="outline" size="sm">
+                    <Link href={`/product/${product.id}`}>
+                      <Eye className="w-4 h-4 mr-1" />
+                      View
+                    </Link>
+                  </Button>
+                  <Button size="sm">
+                    <ShoppingCart className="w-4 h-4 mr-1" />
+                    Add to Cart
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        // List View
+        <div className="space-y-4">
+          {productData?.map((product) => (
+            <div
+              key={product.id}
+              className="border rounded-lg overflow-hidden transition hover:shadow-lg cursor-pointer p-4"
+            >
+              <div className="flex flex-col sm:flex-row">
+                <div className="sm:w-40 sm:h-40 flex-shrink-0">
+                  <img
+                    alt={product.name}
+                    src={product.images[0] || "/placeholder.svg"}
+                    className="w-full h-40 sm:h-full object-cover rounded-md"
+                  />
+                </div>
+                <div className="flex-1 p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between h-full">
+                    <div className="flex-1 space-y-2 mb-4 sm:mb-0">
+                      <h2 className="text-xl font-semibold">{product.name}</h2>
+                      <p className="text-muted-foreground text-sm line-clamp-2">
+                        {product.description}
+                      </p>
+                      <p className="text-2xl font-bold text-primary">
+                        ${product.price.toFixed(2)}
+                      </p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-2 sm:ml-6">
+                      <Button asChild variant="outline">
+                        <Link href={`/product/${product.id}`}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          View Details
+                        </Link>
+                      </Button>
+                      <Button>
+                        <ShoppingCart className="w-4 h-4 mr-2" />
+                        Add to Cart
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
