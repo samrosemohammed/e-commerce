@@ -150,6 +150,22 @@ export const productColumns: ColumnDef<AdminProduct>[] = [
   {
     id: "actions",
     cell: ({ row }) => {
+      const utils = trpc.useUtils();
+      const { mutate: deleteProduct } =
+        trpc.adminRouter.deleteProduct.useMutation({
+          onSuccess: () => {
+            toast.success("Product deleted");
+            utils.adminRouter.getProduct.invalidate(); // Refresh product list
+          },
+          onError: () => {
+            toast.error("Failed to delete product");
+          },
+        });
+
+      const handleDelete = () => {
+        const id = row.original.id;
+        deleteProduct({ ids: [id] });
+      };
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -162,13 +178,18 @@ export const productColumns: ColumnDef<AdminProduct>[] = [
             <DropdownMenuItem>
               <ExternalLink /> Visit
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => {
+                navigator.clipboard.writeText(row.original.id);
+                toast.success("Product ID copied");
+              }}
+            >
               <Copy />
               Copy ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             {/* <EditBrandForm brand={brand} /> */}
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDelete}>
               <Trash2 />
               Delete
             </DropdownMenuItem>
