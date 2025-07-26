@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import { Product } from "@/types/product";
+import { SessionProvider, useSession } from "next-auth/react";
 
 export interface CartItem {
   product: Product;
@@ -24,15 +25,19 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
 
   useEffect(() => {
-    const stored = localStorage.getItem("cart");
+    if (!userId) return;
+    const stored = localStorage.getItem(`cart_${userId}`);
     if (stored) setCart(JSON.parse(stored));
-  }, []);
+  }, [userId]);
 
   useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(cart));
-  }, [cart]);
+    if (!userId) return;
+    localStorage.setItem(`cart_${userId}`, JSON.stringify(cart));
+  }, [cart, userId]);
 
   const addToCart = (item: CartItem) => {
     setCart((prev) => {

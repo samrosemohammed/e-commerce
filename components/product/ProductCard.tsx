@@ -22,10 +22,32 @@ import { useState } from "react";
 import { MobileFilterCategory } from "../MobileFilterCategory";
 import { trpc } from "@/server/client";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
+import { Product } from "@/types/product";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 export const ProductCard = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
   const { data: productData } = trpc.adminRouter.getProduct.useQuery();
+  const { addToCart } = useCart();
+  const router = useRouter();
+  const { data: session } = useSession();
+  const handleAddToCart = (product: Product) => {
+    if (!session) {
+      toast.warning("You need to login to add products to your cart");
+      router.push("/login");
+      return;
+    }
+    addToCart({
+      product,
+      quantity: 1,
+      selectedColor: product.sizes?.[0] ?? undefined,
+      selectedSize: product.colors?.[0] ?? undefined,
+    });
+    toast.success("Product added to the cart");
+  };
   console.log(productData);
 
   return (
@@ -90,7 +112,7 @@ export const ProductCard = () => {
                       View
                     </Link>
                   </Button>
-                  <Button size="sm">
+                  <Button onClick={() => handleAddToCart(product)} size="sm">
                     <ShoppingCart className="w-4 h-4 mr-1" />
                     Add to Cart
                   </Button>
@@ -133,7 +155,7 @@ export const ProductCard = () => {
                           View Details
                         </Link>
                       </Button>
-                      <Button>
+                      <Button onClick={() => handleAddToCart(product)}>
                         <ShoppingCart className="w-4 h-4 mr-2" />
                         Add to Cart
                       </Button>

@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 import {
   brandSchema,
   categorySchema,
@@ -101,11 +101,8 @@ export const adminRouter = router({
       return product;
     }),
 
-  getProduct: protectedProcedure.query(async ({ ctx }) => {
+  getProduct: publicProcedure.query(async () => {
     const products = await prisma.product.findMany({
-      where: {
-        createdById: ctx.user.id,
-      },
       orderBy: {
         name: "asc",
       },
