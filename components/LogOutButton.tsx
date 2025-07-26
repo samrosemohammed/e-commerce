@@ -6,7 +6,11 @@ import { DropdownMenuItem } from "./ui/dropdown-menu";
 export const LogOutDropDownItem = () => {
   return (
     <DropdownMenuItem
-      onClick={() => signOut()}
+      onClick={() =>
+        signOut({
+          callbackUrl: "/login",
+        })
+      }
       className="flex items-center gap-2"
     >
       <LogOut className="w-4 h-4" />

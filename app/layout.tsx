@@ -39,8 +39,8 @@ export default async function RootLayout({
         >
           <Provider>
             <CartProvider>
-              {/* {user?.role !== "admin" && <NavBar />} */}
-              <NavBar />
+              {user?.role !== "admin" && <NavBar />}
+              {/* <NavBar /> */}
               {children}
             </CartProvider>
           </Provider>

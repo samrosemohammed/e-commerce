@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { trpc } from "@/server/client";
 import { AdminProduct } from "@/types/product";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 export const productColumns: ColumnDef<AdminProduct>[] = [
   {
@@ -175,8 +176,10 @@ export const productColumns: ColumnDef<AdminProduct>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>
-              <ExternalLink /> Visit
+            <DropdownMenuItem asChild>
+              <Link target="_blank" href={`product/${row.original.id}`}>
+                <ExternalLink /> Visit
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => {
