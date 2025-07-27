@@ -64,7 +64,9 @@ export default function CartItemsList() {
                       onClick={() =>
                         updateQuantity(
                           item.product.id,
-                          Math.max(1, item.quantity - 1)
+                          Math.max(1, item.quantity - 1),
+                          item.selectedSize,
+                          item.selectedColor
                         )
                       }
                       disabled={item.quantity <= 1}
@@ -81,7 +83,12 @@ export default function CartItemsList() {
                       size="icon"
                       className="h-8 w-8 bg-transparent"
                       onClick={() =>
-                        updateQuantity(item.product.id, item.quantity + 1)
+                        updateQuantity(
+                          item.product.id,
+                          item.quantity + 1,
+                          item.selectedSize,
+                          item.selectedColor
+                        )
                       }
                     >
                       <Plus className="h-4 w-4" />
@@ -97,7 +104,13 @@ export default function CartItemsList() {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => removeFromCart(item.product.id)}
+                      onClick={() =>
+                        removeFromCart(
+                          item.product.id,
+                          item.selectedSize,
+                          item.selectedColor
+                        )
+                      }
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>

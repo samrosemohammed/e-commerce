@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/context/CartContext";
 import { ShoppingBag, Trash2 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function CartSummary() {
   const { cart, cartCount, cartTotal, clearCart } = useCart();
-
+  const pathname = usePathname();
   const shipping = cartTotal > 50 ? 0 : 5.99;
   const tax = cartTotal * 0.08;
   const finalTotal = cartTotal + shipping + tax;
@@ -94,20 +96,24 @@ export default function CartSummary() {
         )}
 
         {/* Buttons */}
-        <div className="space-y-2 pt-4">
-          <Button className="w-full" size="lg">
-            Proceed to Checkout
-          </Button>
+        {pathname !== "/checkout" ? (
+          <div className="space-y-2 pt-4">
+            <Button asChild className="w-full" size="lg">
+              <Link href={"/checkout"}>Proceed to Checkout</Link>
+            </Button>
 
-          <Button
-            variant="outline"
-            className="w-full bg-transparent"
-            onClick={clearCart}
-          >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Clear Cart
-          </Button>
-        </div>
+            <Button
+              variant="outline"
+              className="w-full bg-transparent"
+              onClick={clearCart}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Clear Cart
+            </Button>
+          </div>
+        ) : (
+          <Button className="w-full">Place Order</Button>
+        )}
       </CardContent>
     </Card>
   );

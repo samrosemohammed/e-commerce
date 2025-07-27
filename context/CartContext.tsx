@@ -14,9 +14,18 @@ export interface CartItem {
 interface CartContextType {
   cart: CartItem[];
   addToCart: (item: CartItem) => void;
-  removeFromCart: (productId: string) => void;
+  removeFromCart: (
+    productId: string,
+    selectedSize?: string,
+    selectedColor?: string
+  ) => void;
   clearCart: () => void;
-  updateQuantity: (productId: string, quantity: number) => void;
+  updateQuantity: (
+    productId: string,
+    quantity: number,
+    selectedSize?: string,
+    selectedColor?: string
+  ) => void;
   cartCount: number;
   cartTotal: number;
   isLoading?: boolean;
@@ -60,16 +69,37 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     });
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+  const removeFromCart = (
+    productId: string,
+    selectedSize?: string,
+    selectedColor?: string
+  ) => {
+    setCart((prev) =>
+      prev.filter(
+        (item) =>
+          !(
+            item.product.id === productId &&
+            item.selectedSize === selectedSize &&
+            item.selectedColor === selectedColor
+          )
+      )
+    );
   };
-
   const clearCart = () => setCart([]);
 
-  const updateQuantity = (productId: string, quantity: number) => {
+  const updateQuantity = (
+    productId: string,
+    quantity: number,
+    selectedSize?: string,
+    selectedColor?: string
+  ) => {
     setCart((prev) =>
       prev.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
+        item.product.id === productId &&
+        item.selectedSize === selectedSize &&
+        item.selectedColor === selectedColor
+          ? { ...item, quantity }
+          : item
       )
     );
   };
