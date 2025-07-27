@@ -124,7 +124,8 @@ export const productSchema = z.object({
 });
 export type ProductFormData = z.infer<typeof productSchema>;
 
-export const orderSchema = z.object({
+// Form schema - only for form fields
+export const orderFormSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Invalid email address"),
@@ -136,27 +137,36 @@ export const orderSchema = z.object({
   paymentMethod: z.enum(["cash", "esewa"]),
 });
 
-export type OrderFormData = z.infer<typeof orderSchema>;
-
-const orderProductSchema = z.object({
-  productId: z.string(),
-  name: z.string(),
-  quantity: z.number().int().positive(),
-  selectedSize: z.string().optional().nullable(),
-  selectedColor: z.string().optional().nullable(),
-  price: z.number().nonnegative(),
-  total: z.number().nonnegative(),
+// Complete order schema - for the backend
+export const orderSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(7, "Phone number is too short"),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  province: z.string().optional(),
+  zip: z.string().min(4, "Zip code is too short"),
+  paymentMethod: z.enum(["cash", "esewa"]),
+  products: z.array(
+    z.object({
+      productId: z.string(),
+      name: z.string(),
+      quantity: z.number(),
+      selectedSize: z.string().optional(),
+      selectedColor: z.string().optional(),
+      price: z.number(),
+      total: z.number(),
+    })
+  ),
+  summary: z.object({
+    items: z.number(),
+    cartTotal: z.number(),
+    shipping: z.number(),
+    tax: z.number(),
+    finalTotal: z.number(),
+  }),
 });
 
-const orderSummarySchema = z.object({
-  items: z.number().int().nonnegative(),
-  cartTotal: z.number().nonnegative(),
-  shipping: z.number().nonnegative(),
-  tax: z.number().nonnegative(),
-  finalTotal: z.number().nonnegative(),
-});
-
-export const extendedOrderSchema = orderSchema.extend({
-  products: z.array(orderProductSchema),
-  summary: orderProductSchema,
-});
+export type OrderFormData = z.infer<typeof orderFormSchema>;
+export type OrderData = z.infer<typeof orderSchema>;

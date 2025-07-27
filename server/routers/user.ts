@@ -5,6 +5,65 @@ import z from "zod";
 import { orderSchema } from "@/lib/zodSchemas";
 
 export const userRouter = router({
+  createOrder: protectedProcedure
+    .input(orderSchema)
+    .mutation(async ({ input, ctx }) => {
+      const userId = ctx.user.id;
+      console.log(input);
+      // Destructure input
+      const {
+        firstName,
+        lastName,
+        email,
+        phone,
+        address,
+        city,
+        province,
+        zip,
+        paymentMethod,
+        products,
+        summary,
+      } = input;
+
+      // Step 1: Create the order
+      const order = await prisma.order.create({
+        data: {
+          userId,
+          firstName,
+          lastName,
+          email,
+          phone,
+          address,
+          city,
+          province,
+          zip,
+          paymentMethod,
+          cartTotal: summary.cartTotal,
+          shipping: summary.shipping,
+          tax: summary.tax,
+          finalTotal: summary.finalTotal,
+          status: "pending",
+          items: {
+            create: products.map((product) => ({
+              name: product.name,
+              quantity: product.quantity,
+              price: product.price,
+              selectedSize: product.selectedSize ?? "",
+              selectedColor: product.selectedColor ?? "",
+              total: product.total,
+              product: {
+                connect: { id: product.productId },
+              },
+            })),
+          },
+        },
+        include: {
+          items: true, // Optional: include order items in response
+        },
+      });
+
+      return order;
+    }),
   getProductById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {

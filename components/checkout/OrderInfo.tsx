@@ -6,7 +6,7 @@ import { Input } from "../ui/input";
 import { useSession } from "next-auth/react";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 import { Controller, useForm } from "react-hook-form";
-import { OrderFormData, orderSchema } from "@/lib/zodSchemas";
+import { OrderFormData, orderFormSchema, orderSchema } from "@/lib/zodSchemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCart } from "@/context/CartContext";
 import Image from "next/image";
@@ -14,6 +14,7 @@ import { Separator } from "../ui/separator";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { trpc } from "@/server/client";
+import { toast } from "sonner";
 
 export const OrderInfo = () => {
   const { data: session } = useSession();
@@ -21,6 +22,16 @@ export const OrderInfo = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initiateEsewaPayment =
     trpc.paymentRouter.initiateEsewaPayment.useMutation();
+  const { mutate: createOrder } = trpc.userRouter.createOrder.useMutation({
+    onSuccess: (data) => {
+      console.log(data);
+      toast.success("Order Created");
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error(err.message);
+    },
+  });
 
   const {
     register,
@@ -28,7 +39,7 @@ export const OrderInfo = () => {
     formState: { errors },
     control,
   } = useForm<OrderFormData>({
-    resolver: zodResolver(orderSchema),
+    resolver: zodResolver(orderFormSchema),
     defaultValues: {
       email: session?.user.email ?? "",
       paymentMethod: "cash",
@@ -64,11 +75,13 @@ export const OrderInfo = () => {
       };
 
       if (data.paymentMethod === "cash") {
+        createOrder(enrichedData);
         console.log("Cash Order:", enrichedData);
         return;
       }
 
       if (data.paymentMethod === "esewa") {
+        createOrder(enrichedData);
         const result = await initiateEsewaPayment.mutateAsync({
           amount: finalTotal.toFixed(2),
           transactionId,
