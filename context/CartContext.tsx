@@ -19,12 +19,14 @@ interface CartContextType {
   updateQuantity: (productId: string, quantity: number) => void;
   cartCount: number;
   cartTotal: number;
+  isLoading?: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true); // <-- NEW
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
@@ -32,6 +34,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     if (!userId) return;
     const stored = localStorage.getItem(`cart_${userId}`);
     if (stored) setCart(JSON.parse(stored));
+    setIsLoading(false); // <- Finish loading once cart is read
   }, [userId]);
 
   useEffect(() => {
@@ -87,6 +90,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         updateQuantity,
         cartCount,
         cartTotal,
+        isLoading,
       }}
     >
       {children}

@@ -17,6 +17,9 @@ import { Button } from "../ui/button";
 import { capitalizeWords } from "@/lib/utils";
 import { toast } from "sonner";
 import { useCart } from "@/context/CartContext";
+import { useSession } from "next-auth/react";
+import { authOptions } from "@/lib/authOptions";
+import { useRouter } from "next/navigation";
 
 interface ProductContentProps {
   product: Product;
@@ -39,6 +42,8 @@ export const ProductContent = ({ product }: ProductContentProps) => {
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const { data: session } = useSession();
+  const router = useRouter();
 
   const discountPercentage = comparePrice
     ? Math.round(((comparePrice - price) / comparePrice) * 100)
@@ -50,6 +55,10 @@ export const ProductContent = ({ product }: ProductContentProps) => {
   };
 
   const handleAddToCart = () => {
+    if (!session?.user) {
+      router.push("/login");
+      return;
+    }
     if (!selectedColor || !selectedSize) {
       toast.error("Please select size and color");
       return;

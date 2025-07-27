@@ -77,14 +77,13 @@ export const adminRouter = router({
 
       return created;
     }),
-  getProductById: protectedProcedure
+  getProductById: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ input, ctx }) => {
       console.log("id", input);
       const product = await prisma.product.findUnique({
         where: {
           id: input.id,
-          createdById: ctx.user.id, // security check
         },
         include: {
           brand: {

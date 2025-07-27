@@ -1,4 +1,12 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
+import {
+  Calendar,
+  ChevronUp,
+  Home,
+  Inbox,
+  Search,
+  Settings,
+  User2,
+} from "lucide-react";
 
 import {
   Sidebar,
@@ -9,8 +17,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
+import { LogOutDropDownItem } from "./LogOutButton";
 
 // Menu items.
 const items = [
@@ -41,7 +59,9 @@ const items = [
   },
 ];
 
-export const AppSideBar = () => {
+export const AppSideBar = async () => {
+  const session = await getServerSession(authOptions);
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -63,6 +83,32 @@ export const AppSideBar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton>
+                  <User2 /> {session?.user?.name}
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                side="top"
+                className="w-[--radix-popper-anchor-width]"
+              >
+                <DropdownMenuItem>
+                  <span>Account</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <span>Billing</span>
+                </DropdownMenuItem>
+                <LogOutDropDownItem />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 };

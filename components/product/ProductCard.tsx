@@ -1,13 +1,5 @@
 "use client";
-import Image from "next/image";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -18,7 +10,7 @@ import {
 } from "../ui/select";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { Eye, Grid, Grid2x2, List, Menu, ShoppingCart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MobileFilterCategory } from "../MobileFilterCategory";
 import { trpc } from "@/server/client";
 import Link from "next/link";
@@ -27,10 +19,14 @@ import { Product } from "@/types/product";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { SkeletonProductCard } from "../skeleton/ProductCard";
+import { Badge } from "../ui/badge";
+import { capitalizeWords } from "@/lib/utils";
 
 export const ProductCard = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
-  const { data: productData } = trpc.adminRouter.getProduct.useQuery();
+  const { data: productData, isLoading } =
+    trpc.adminRouter.getProduct.useQuery();
   const { addToCart } = useCart();
   const router = useRouter();
   const { data: session } = useSession();
@@ -49,6 +45,22 @@ export const ProductCard = () => {
     toast.success("Product added to the cart");
   };
   console.log(productData);
+
+  // Save view preference whenever it changes
+  const handleViewChange = (newView: string) => {
+    if (newView && (newView === "grid" || newView === "list")) {
+      setView(newView as "grid" | "list");
+      localStorage.setItem("productView", newView);
+    }
+  };
+
+  // Load saved view preference on component mount
+  useEffect(() => {
+    const savedView = localStorage.getItem("productView");
+    if (savedView === "grid" || savedView === "list") {
+      setView(savedView);
+    }
+  }, []);
 
   return (
     <div className="w-full">
@@ -72,7 +84,7 @@ export const ProductCard = () => {
           <ToggleGroup
             type="single"
             value={view}
-            onValueChange={(val) => val && setView(val as "grid" | "list")}
+            onValueChange={handleViewChange}
           >
             <ToggleGroupItem value="grid" aria-label="Grid View">
               <Grid2x2 className="w-5 h-5" />
@@ -83,12 +95,17 @@ export const ProductCard = () => {
           </ToggleGroup>
         </div>
       </div>
-      {view === "grid" ? (
+      {isLoading ? (
+        <SkeletonProductCard view={view} />
+      ) : view === "grid" ? (
         // Grid View
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {productData?.map((product) => (
             <div
               key={product.id}
+              onClick={() => {
+                router.push(`/product/${product.id}`);
+              }}
               className="border rounded-lg overflow-hidden transition hover:shadow-lg hover:scale-[1.01] cursor-pointer"
             >
               <div>
@@ -105,24 +122,11 @@ export const ProductCard = () => {
                     ${product.price.toFixed(2)}
                   </p>
                 </div>
-                <div className="flex items-center justify-between gap-2">
-                  <Button asChild variant="outline" size="sm">
-                    <Link href={`/product/${product.id}`}>
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Link>
-                  </Button>
-                  <Button onClick={() => handleAddToCart(product)} size="sm">
-                    <ShoppingCart className="w-4 h-4 mr-1" />
-                    Add to Cart
-                  </Button>
-                </div>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        // List View
         <div className="space-y-4">
           {productData?.map((product) => (
             <div
@@ -147,18 +151,6 @@ export const ProductCard = () => {
                       <p className="text-2xl font-bold text-primary">
                         ${product.price.toFixed(2)}
                       </p>
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2 sm:ml-6">
-                      <Button asChild variant="outline">
-                        <Link href={`/product/${product.id}`}>
-                          <Eye className="w-4 h-4 mr-2" />
-                          View Details
-                        </Link>
-                      </Button>
-                      <Button onClick={() => handleAddToCart(product)}>
-                        <ShoppingCart className="w-4 h-4 mr-2" />
-                        Add to Cart
-                      </Button>
                     </div>
                   </div>
                 </div>
