@@ -50,6 +50,7 @@ model User {
   categories     Category[]
   products       Product[]
   brands         Brand[]
+  order          Order[]
 }
 
 model VerificationRequest {
@@ -92,10 +93,10 @@ model Brand {
 }
 
 model Product {
-  id            String   @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String
-  code          String?  @default("")
-  description   String?  @default("")
+  code          String?     @default("")
+  description   String?     @default("")
   price         Float
   cost          Float? // corresponds to productCost
   comparePrice  Float? // corresponds to productComparePrice
@@ -110,6 +111,7 @@ model Product {
   tags          String[] // corresponds to productTags
   status        String
   images        String[]
+  orderItems    OrderItem[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -117,5 +119,44 @@ model Product {
 
   createdBy User     @relation(fields: [createdById], references: [id])
   category  Category @relation(fields: [categoryId], references: [id])
-  brand     Brand?    @relation(fields: [brandId], references: [id])
+  brand     Brand?   @relation(fields: [brandId], references: [id])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  userId        String? // Optional if guest checkout is allowed
+  user          User?       @relation(fields: [userId], references: [id])
+  firstName     String
+  lastName      String
+  email         String
+  phone         String
+  address       String
+  city          String
+  province      String?
+  zip           String
+  paymentMethod String
+  items         OrderItem[]
+  cartTotal     Float
+  shipping      Float
+  tax           Float
+  finalTotal    Float
+  status        String      @default("pending") // pending, completed, cancelled
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id]) // ← Add this
+
+  name          String
+  quantity      Int
+  price         Float
+  selectedSize  String
+  selectedColor String
+  total         Float
 }

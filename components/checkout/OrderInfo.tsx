@@ -1,5 +1,5 @@
 "use client";
-import { ShoppingBag, Truck, Wallet } from "lucide-react";
+import { Loader2, ShoppingBag, Truck, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -43,8 +43,7 @@ export const OrderInfo = () => {
 
     try {
       const transactionId = `TXN-${Date.now()}`;
-
-      const orderDetails = {
+      const enrichedData = {
         ...data,
         products: cart.map((item) => ({
           productId: item.product.id,
@@ -65,7 +64,7 @@ export const OrderInfo = () => {
       };
 
       if (data.paymentMethod === "cash") {
-        console.log("Cash Order:", orderDetails);
+        console.log("Cash Order:", enrichedData);
         return;
       }
 
@@ -343,7 +342,14 @@ export const OrderInfo = () => {
                     Add ${(50 - cartTotal).toFixed(2)} more for free shipping!
                   </p>
                 )}
-                <Button type="submit" className="w-full">
+                <Button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="animate-spin size-4" />
+                  ) : null}{" "}
                   Place Order
                 </Button>
               </CardContent>

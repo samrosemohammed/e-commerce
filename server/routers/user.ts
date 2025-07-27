@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import { publicProcedure, router } from "../trpc";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
+import { orderSchema } from "@/lib/zodSchemas";
 
 export const userRouter = router({
   getProductById: publicProcedure

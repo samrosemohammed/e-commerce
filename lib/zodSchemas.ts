@@ -137,3 +137,26 @@ export const orderSchema = z.object({
 });
 
 export type OrderFormData = z.infer<typeof orderSchema>;
+
+const orderProductSchema = z.object({
+  productId: z.string(),
+  name: z.string(),
+  quantity: z.number().int().positive(),
+  selectedSize: z.string().optional().nullable(),
+  selectedColor: z.string().optional().nullable(),
+  price: z.number().nonnegative(),
+  total: z.number().nonnegative(),
+});
+
+const orderSummarySchema = z.object({
+  items: z.number().int().nonnegative(),
+  cartTotal: z.number().nonnegative(),
+  shipping: z.number().nonnegative(),
+  tax: z.number().nonnegative(),
+  finalTotal: z.number().nonnegative(),
+});
+
+export const extendedOrderSchema = orderSchema.extend({
+  products: z.array(orderProductSchema),
+  summary: orderProductSchema,
+});
