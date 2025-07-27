@@ -26,7 +26,7 @@ import { capitalizeWords } from "@/lib/utils";
 export const ProductCard = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
   const { data: productData, isLoading } =
-    trpc.adminRouter.getProduct.useQuery();
+    trpc.userRouter.getProduct.useQuery();
   const { addToCart } = useCart();
   const router = useRouter();
   const { data: session } = useSession();

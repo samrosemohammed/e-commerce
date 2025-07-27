@@ -1,4 +1,4 @@
-import { protectedProcedure, publicProcedure, router } from "../trpc";
+import { protectedProcedure, router } from "../trpc";
 import {
   brandSchema,
   categorySchema,
@@ -8,7 +8,6 @@ import {
 } from "@/lib/zodSchemas";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { TRPCError } from "@trpc/server";
 
 export const adminRouter = router({
   createProduct: protectedProcedure
@@ -77,49 +76,7 @@ export const adminRouter = router({
 
       return created;
     }),
-  getProductById: publicProcedure
-    .input(z.object({ id: z.string() }))
-    .query(async ({ input, ctx }) => {
-      console.log("id", input);
-      const product = await prisma.product.findUnique({
-        where: {
-          id: input.id,
-        },
-        include: {
-          brand: {
-            select: { name: true },
-          },
-          category: {
-            select: { name: true },
-          },
-        },
-      });
 
-      if (!product) throw new TRPCError({ code: "NOT_FOUND" });
-
-      return product;
-    }),
-
-  getProduct: publicProcedure.query(async () => {
-    const products = await prisma.product.findMany({
-      orderBy: {
-        name: "asc",
-      },
-      include: {
-        brand: {
-          select: {
-            name: true,
-          },
-        },
-        category: {
-          select: {
-            name: true,
-          },
-        },
-      },
-    });
-    return products;
-  }),
   getCategories: protectedProcedure.query(async ({ ctx }) => {
     const categories = await prisma.category.findMany({
       where: {

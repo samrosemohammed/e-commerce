@@ -8,6 +8,17 @@ import { useCart } from "@/context/CartContext";
 import { ShoppingBag, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "../ui/alert-dialog";
 
 export default function CartSummary() {
   const { cart, cartCount, cartTotal, clearCart } = useCart();
@@ -96,24 +107,20 @@ export default function CartSummary() {
         )}
 
         {/* Buttons */}
-        {pathname !== "/checkout" ? (
-          <div className="space-y-2 pt-4">
-            <Button asChild className="w-full" size="lg">
-              <Link href={"/checkout"}>Proceed to Checkout</Link>
-            </Button>
+        <div className="space-y-2 pt-4">
+          <Button asChild className="w-full" size="lg">
+            <Link href={"/checkout"}>Proceed to Checkout</Link>
+          </Button>
 
-            <Button
-              variant="outline"
-              className="w-full bg-transparent"
-              onClick={clearCart}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Clear Cart
-            </Button>
-          </div>
-        ) : (
-          <Button className="w-full">Place Order</Button>
-        )}
+          <Button
+            variant="outline"
+            className="w-full bg-transparent"
+            onClick={clearCart}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Clear Cart
+          </Button>
+        </div>
       </CardContent>
     </Card>
   );

@@ -13,7 +13,7 @@ interface ProductDetailsProps {
 
 export const ProductDetails = ({ id }: ProductDetailsProps) => {
   const { data: productData, isLoading } =
-    trpc.adminRouter.getProductById.useQuery({ id });
+    trpc.userRouter.getProductById.useQuery({ id });
 
   if (isLoading) {
     return (

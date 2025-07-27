@@ -123,3 +123,17 @@ export const productSchema = z.object({
   productImages: z.array(z.string().url()).optional(),
 });
 export type ProductFormData = z.infer<typeof productSchema>;
+
+export const orderSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(7, "Phone number is too short"),
+  address: z.string().min(1, "Address is required"),
+  city: z.string().min(1, "City is required"),
+  province: z.string().optional(),
+  zip: z.string().min(4, "Zip code is too short"),
+  paymentMethod: z.enum(["cash", "esewa"]),
+});
+
+export type OrderFormData = z.infer<typeof orderSchema>;

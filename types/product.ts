@@ -55,4 +55,4 @@ export type AdminProduct = {
 };
 
 export type Product =
-  inferRouterOutputs<AppRouter>["adminRouter"]["getProductById"];
+  inferRouterOutputs<AppRouter>["userRouter"]["getProductById"];
