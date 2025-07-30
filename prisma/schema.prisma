@@ -122,12 +122,6 @@ model Product {
   brand     Brand?   @relation(fields: [brandId], references: [id])
 }
 
-enum OrderStatus {
-  pending
-  completed
-  cancelled
-}
-
 model Order {
   id            String      @id @default(cuid())
   userId        String? // Optional if guest checkout is allowed
@@ -146,7 +140,7 @@ model Order {
   shipping      Float
   tax           Float
   finalTotal    Float
-status        OrderStatus @default(pending)
+  status        String      @default("pending") // pending, completed, cancelled
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }

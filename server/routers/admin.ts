@@ -1,4 +1,4 @@
-import { protectedProcedure, router } from "../trpc";
+import { protectedProcedure, publicProcedure, router } from "../trpc";
 import {
   brandSchema,
   categorySchema,
@@ -150,4 +150,24 @@ export const adminRouter = router({
         data: { name: name.toLowerCase(), status },
       });
     }),
+  getProduct: publicProcedure.query(async () => {
+    const products = await prisma.product.findMany({
+      orderBy: {
+        name: "asc",
+      },
+      include: {
+        brand: {
+          select: {
+            name: true,
+          },
+        },
+        category: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    return products;
+  }),
 });

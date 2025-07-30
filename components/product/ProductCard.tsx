@@ -131,6 +131,9 @@ export const ProductCard = () => {
           {productData?.map((product) => (
             <div
               key={product.id}
+              onClick={() => {
+                router.push(`/product/${product.id}`);
+              }}
               className="border rounded-lg overflow-hidden transition hover:shadow-lg cursor-pointer p-4"
             >
               <div className="flex flex-col sm:flex-row">

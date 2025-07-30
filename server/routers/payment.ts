@@ -20,8 +20,8 @@ export const paymentRouter = router({
       const product_service_charge = "0";
       const product_delivery_charge = "0";
 
-      const success_url = `${process.env.NEXT_PUBLIC_BASE_URL}/esewa-success`;
-      const failure_url = `${process.env.NEXT_PUBLIC_BASE_URL}/esewa-failure`;
+      const success_url = `${process.env.NEXT_PUBLIC_BASE_URL}/success`;
+      const failure_url = `${process.env.NEXT_PUBLIC_BASE_URL}/failure`;
 
       const signed_field_names = [
         "total_amount",

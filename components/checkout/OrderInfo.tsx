@@ -15,17 +15,21 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { trpc } from "@/server/client";
 import { toast } from "sonner";
+import { AlertConfirmation } from "../AlertConfirmation";
+import { useRouter } from "next/navigation";
 
 export const OrderInfo = () => {
   const { data: session } = useSession();
-  const { cart, cartCount, cartTotal } = useCart();
+  const router = useRouter();
+  const { cart, cartCount, cartTotal, clearCart } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initiateEsewaPayment =
     trpc.paymentRouter.initiateEsewaPayment.useMutation();
   const { mutate: createOrder } = trpc.userRouter.createOrder.useMutation({
     onSuccess: (data) => {
       console.log(data);
-      toast.success("Order Created");
+      clearCart();
+      router.push("/success");
     },
     onError: (err) => {
       console.log(err);
@@ -36,6 +40,8 @@ export const OrderInfo = () => {
   const {
     register,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors },
     control,
   } = useForm<OrderFormData>({
@@ -81,12 +87,12 @@ export const OrderInfo = () => {
       }
 
       if (data.paymentMethod === "esewa") {
-        createOrder(enrichedData);
         const result = await initiateEsewaPayment.mutateAsync({
           amount: finalTotal.toFixed(2),
           transactionId,
           productCode: "EPAYTEST",
         });
+        createOrder(enrichedData);
 
         const form = document.createElement("form");
         form.method = "POST";
@@ -355,16 +361,40 @@ export const OrderInfo = () => {
                     Add ${(50 - cartTotal).toFixed(2)} more for free shipping!
                   </p>
                 )}
-                <Button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full"
-                >
-                  {isSubmitting ? (
-                    <Loader2 className="animate-spin size-4" />
-                  ) : null}{" "}
-                  Place Order
-                </Button>
+                {getValues("paymentMethod") === "cash" ? (
+                  <AlertConfirmation
+                    trigger={
+                      <Button disabled={isSubmitting} className="w-full">
+                        {isSubmitting ? (
+                          <Loader2 className="animate-spin size-4" />
+                        ) : null}{" "}
+                        Place Order
+                      </Button>
+                    }
+                    title="Confirm Cash Order"
+                    description="Are you sure you want to place this order using cash on delivery?"
+                    confirmText="Yes, Place Order"
+                    cancelText="Cancel"
+                    onConfirm={async () => {
+                      const isValid = await trigger();
+                      if (!isValid) return;
+                      const values = getValues();
+                      onSubmit(values);
+                      // router.push("/success");
+                    }}
+                  />
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full"
+                  >
+                    {isSubmitting ? (
+                      <Loader2 className="animate-spin size-4" />
+                    ) : null}{" "}
+                    Place Order
+                  </Button>
+                )}
               </CardContent>
             </Card>
           </div>
