@@ -107,4 +107,21 @@ export const userRouter = router({
     });
     return products;
   }),
+
+  getOrder: protectedProcedure.query(async ({ input, ctx }) => {
+    const userId = ctx.user.id;
+    const order = await prisma.order.findMany({
+      where: {
+        userId: userId,
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+    return order;
+  }),
 });
