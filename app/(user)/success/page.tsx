@@ -1,14 +1,92 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { trpc } from "@/server/client";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import {
-  ArrowRight,
-  ChevronRight,
-  CircleCheckBig,
-  ShoppingBag,
-} from "lucide-react";
+import { ArrowRight, CircleCheckBig, Loader2, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 
 export default function SuccessPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const { cart, cartCount, cartTotal, clearCart } = useCart();
+  const [loading, setLoading] = useState(true);
+  const [orderCreated, setOrderCreated] = useState(false);
+
+  const createOrder = trpc.userRouter.createOrder.useMutation({
+    onSuccess: () => {
+      toast.success("Order placed successfully!");
+      clearCart();
+      localStorage.removeItem("pendingOrder");
+      setOrderCreated(true);
+      setLoading(false);
+    },
+    onError: (err) => {
+      toast.error("Failed to create order");
+      console.error(err);
+      setLoading(false);
+    },
+  });
+
+  useEffect(() => {
+    const encodedData = searchParams.get("data");
+
+    if (!encodedData) {
+      toast.error("Missing payment confirmation.");
+      router.push("/");
+      return;
+    }
+
+    try {
+      const decoded = atob(encodedData);
+      const responseParams = JSON.parse(decoded);
+      const { status, transaction_uuid } = responseParams;
+
+      if (status !== "COMPLETE") {
+        toast.error("Payment was not successful.");
+        router.push("/failure");
+        return;
+      }
+
+      const storedOrder = localStorage.getItem("pendingOrder");
+      if (!storedOrder) {
+        toast.error("No order data found.");
+        router.push("/");
+        return;
+      }
+
+      const orderData = JSON.parse(storedOrder);
+
+      createOrder.mutate(orderData, {
+        onSuccess: () => {
+          localStorage.removeItem("pendingOrder");
+        },
+      });
+    } catch (err) {
+      console.error("Failed to process eSewa response:", err);
+      toast.error("Could not verify payment.");
+      router.push("/");
+    }
+  }, []);
+
+  // Show loading while order is being created
+  if (loading) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center">
+        <div className="space-y-2 flex flex-col items-center justify-center">
+          <Loader2 className="animate-spin w-12 h-12 text-muted-foreground" />
+          <p className="text-lg font-medium">Processing your payment...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show success card after order is created
   return (
     <div className="min-h-[80vh] flex items-center justify-center">
       <Card className="text-center max-w-md w-full shadow-lg">

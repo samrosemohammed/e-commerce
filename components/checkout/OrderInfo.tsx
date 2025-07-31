@@ -92,7 +92,8 @@ export const OrderInfo = () => {
           transactionId,
           productCode: "EPAYTEST",
         });
-        createOrder(enrichedData);
+        // createOrder(enrichedData);
+        localStorage.setItem("pendingOrder", JSON.stringify(enrichedData));
 
         const form = document.createElement("form");
         form.method = "POST";
@@ -371,8 +372,8 @@ export const OrderInfo = () => {
                         Place Order
                       </Button>
                     }
-                    title="Confirm Cash Order"
-                    description="Are you sure you want to place this order using cash on delivery?"
+                    title="Confirm Order"
+                    description="Are you sure you want to place this order ?"
                     confirmText="Yes, Place Order"
                     cancelText="Cancel"
                     onConfirm={async () => {
