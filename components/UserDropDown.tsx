@@ -39,7 +39,7 @@ export const UserDropDown = async () => {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/orders" className="flex items-center gap-2">
+              <Link href="/order" className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4" />
                 My Orders
               </Link>

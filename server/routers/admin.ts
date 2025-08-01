@@ -8,6 +8,7 @@ import {
 } from "@/lib/zodSchemas";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 export const adminRouter = router({
   createProduct: protectedProcedure
@@ -169,5 +170,25 @@ export const adminRouter = router({
       },
     });
     return products;
+  }),
+
+  getOrderByCustomer: protectedProcedure.query(async ({ input, ctx }) => {
+    const userId = ctx.user.id;
+    if (!userId) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "You must be logged in to view your orders.",
+      });
+    }
+    const order = await prisma.order.findMany({
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+    });
+    return order;
   }),
 });

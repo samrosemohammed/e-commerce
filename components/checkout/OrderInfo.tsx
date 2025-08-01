@@ -25,17 +25,6 @@ export const OrderInfo = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initiateEsewaPayment =
     trpc.paymentRouter.initiateEsewaPayment.useMutation();
-  const { mutate: createOrder } = trpc.userRouter.createOrder.useMutation({
-    onSuccess: (data) => {
-      console.log(data);
-      clearCart();
-      router.push("/success");
-    },
-    onError: (err) => {
-      console.log(err);
-      toast.error(err.message);
-    },
-  });
 
   const {
     register,
@@ -79,10 +68,10 @@ export const OrderInfo = () => {
           finalTotal,
         },
       };
-
+      // createOrder(enrichedData);
+      localStorage.setItem("pendingOrder", JSON.stringify(enrichedData));
       if (data.paymentMethod === "cash") {
-        createOrder(enrichedData);
-        console.log("Cash Order:", enrichedData);
+        router.push("/success");
         return;
       }
 
@@ -92,8 +81,6 @@ export const OrderInfo = () => {
           transactionId,
           productCode: "EPAYTEST",
         });
-        // createOrder(enrichedData);
-        localStorage.setItem("pendingOrder", JSON.stringify(enrichedData));
 
         const form = document.createElement("form");
         form.method = "POST";

@@ -53,6 +53,11 @@ const items = [
     icon: Search,
   },
   {
+    title: "Orders",
+    url: "admin-order",
+    icon: Search,
+  },
+  {
     title: "Settings",
     url: "#",
     icon: Settings,
