@@ -22,6 +22,7 @@ import { useCart } from "@/context/CartContext";
 import { useSession } from "next-auth/react";
 import { authOptions } from "@/lib/authOptions";
 import { useRouter } from "next/navigation";
+import { useWishlist } from "@/context/WishlistContext";
 
 interface ProductContentProps {
   product: Product;
@@ -43,10 +44,10 @@ export const ProductContent = ({ product }: ProductContentProps) => {
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist();
 
   const discountPercentage = comparePrice
     ? Math.round(((comparePrice - price) / comparePrice) * 100)
@@ -230,11 +231,15 @@ export const ProductContent = ({ product }: ProductContentProps) => {
         <Button
           variant="outline"
           size="lg"
-          onClick={() => setIsWishlisted(!isWishlisted)}
+          onClick={() =>
+            isWishlisted(product.id)
+              ? removeFromWishlist(product.id)
+              : addToWishlist(product)
+          }
         >
           <Heart
             className={`w-5 h-5 ${
-              isWishlisted ? "fill-red-500 text-red-500" : ""
+              isWishlisted(product.id) ? "fill-red-500 text-red-500" : ""
             }`}
           />
         </Button>

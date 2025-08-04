@@ -8,6 +8,7 @@ import { NavBar } from "@/components/NavBar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -38,9 +39,11 @@ export default async function RootLayout({
         >
           <Provider>
             <CartProvider>
-              {user?.role !== "admin" && <NavBar />}
-              {/* <NavBar /> */}
-              {children}
+              <WishlistProvider>
+                {user?.role !== "admin" && <NavBar />}
+                {/* <NavBar /> */}
+                {children}
+              </WishlistProvider>
             </CartProvider>
           </Provider>
           <Toaster richColors />

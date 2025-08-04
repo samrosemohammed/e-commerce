@@ -1,5 +1,4 @@
 import { FilterCategory } from "@/components/FilterCategory";
-import { NavBar } from "@/components/NavBar";
 import { ProductCard } from "@/components/product/ProductCard";
 import { FilterProvider } from "@/context/FilterContext";
 import { authOptions } from "@/lib/authOptions";

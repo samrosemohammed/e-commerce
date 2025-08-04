@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
-import { Grid2x2, List } from "lucide-react";
+import { Grid2x2, Heart, List } from "lucide-react";
 import { useEffect, useState } from "react";
 import { MobileFilterCategory } from "../MobileFilterCategory";
 import { trpc } from "@/server/client";
@@ -21,11 +21,13 @@ import { SkeletonProductCard } from "../skeleton/ProductCard";
 import { Badge } from "../ui/badge";
 import { capitalizeWords } from "@/lib/utils";
 import { useFilters } from "@/context/FilterContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 export const ProductCard = () => {
   const [view, setView] = useState<"grid" | "list">("grid");
   const { filters, updateFilter } = useFilters();
   const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist();
   const router = useRouter();
   const { data: session } = useSession();
 
@@ -46,19 +48,22 @@ export const ProductCard = () => {
     sortBy: filters.sortBy as any,
   });
 
-  const handleAddToCart = (product: Product) => {
+  const toggleWishlist = (e: React.MouseEvent, product: Product) => {
+    e.stopPropagation();
+
     if (!session) {
-      toast.warning("You need to login to add products to your cart");
+      toast.warning("Please login to use the wishlist.");
       router.push("/login");
       return;
     }
-    addToCart({
-      product,
-      quantity: 1,
-      selectedColor: product.sizes?.[0] ?? undefined,
-      selectedSize: product.colors?.[0] ?? undefined,
-    });
-    toast.success("Product added to the cart");
+
+    if (isWishlisted(product.id)) {
+      removeFromWishlist(product.id);
+      toast.success("Removed from wishlist.");
+    } else {
+      addToWishlist(product);
+      toast.success("Added to wishlist.");
+    }
   };
 
   const handleViewChange = (newView: string) => {
@@ -163,12 +168,25 @@ export const ProductCard = () => {
               onClick={() => router.push(`/product/${product.id}`)}
               className="border rounded-lg overflow-hidden transition hover:shadow-lg hover:scale-[1.01] cursor-pointer"
             >
-              <div>
+              <div className="relative">
                 <img
                   alt={product.name}
                   src={product.images[0] || "/placeholder.svg"}
                   className="w-full h-64 aspect-square object-cover rounded-t-lg"
                 />
+
+                <button
+                  className="absolute top-1 right-2 bg-white  text-black rounded-full p-2 shadow"
+                  onClick={(e) => toggleWishlist(e, product)}
+                >
+                  <Heart
+                    className={`w-4 h-4 ${
+                      isWishlisted(product.id) && session?.user.id
+                        ? "fill-red-500 text-red-500"
+                        : ""
+                    }`}
+                  />
+                </button>
               </div>
               <div className="p-4 space-y-4">
                 {product.tags && product.tags.length > 0 && (
