@@ -116,6 +116,15 @@ export const ProductCard = () => {
                 />
               </div>
               <div className="p-4 space-y-4">
+                {product.tags && product.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {product.tags.map((tag, index) => (
+                      <Badge key={index} variant="secondary">
+                        {capitalizeWords(tag)}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
                 <div className="space-y-2">
                   <h2 className="text-lg font-semibold">{product.name}</h2>
                   <p className="text-xl font-bold text-primary">
@@ -145,6 +154,15 @@ export const ProductCard = () => {
                   />
                 </div>
                 <div className="flex-1 p-6">
+                  {product.tags && product.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {product.tags.map((tag, index) => (
+                        <Badge key={index} variant="secondary">
+                          {capitalizeWords(tag)}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between h-full">
                     <div className="flex-1 space-y-2 mb-4 sm:mb-0">
                       <h2 className="text-xl font-semibold">{product.name}</h2>

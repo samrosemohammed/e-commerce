@@ -73,7 +73,7 @@ export const ProductContent = ({ product }: ProductContentProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <div>
         <div className="flex items-center gap-2 mb-2">
           {brand && (
@@ -81,6 +81,15 @@ export const ProductContent = ({ product }: ProductContentProps) => {
           )}
           <Badge variant="outline">{capitalizeWords(category?.name)}</Badge>
         </div>
+        {product.tags && product.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2 my-4">
+            {product.tags.map((tag, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                #{tag}
+              </Badge>
+            ))}
+          </div>
+        )}
         <h1 className="text-3xl font-bold mb-2">{name}</h1>
         {code && <p className="text-sm text-muted-foreground">SKU: {code}</p>}
       </div>
@@ -108,9 +117,7 @@ export const ProductContent = ({ product }: ProductContentProps) => {
         )}
       </div>
 
-      {description && (
-        <p className="text-muted-foreground leading-relaxed">{description}</p>
-      )}
+      <div className="text-muted-foreground leading-relaxed">{description}</div>
 
       {sizes.length > 0 && (
         <div>
@@ -152,24 +159,36 @@ export const ProductContent = ({ product }: ProductContentProps) => {
       <div>
         <h3 className="font-semibold mb-3">Quantity</h3>
         <div className="flex items-center gap-3">
-          <div className="flex items-center border rounded-md">
-            <button
+          <div className="flex items-center border rounded-md divide-x dark:border-gray-700">
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="p-2 hover:bg-gray-100"
+              disabled={quantity === 1}
+              className="rounded-none"
             >
               <Minus className="w-4 h-4" />
-            </button>
-            <span className="px-4 py-2 min-w-[60px] text-center">
+            </Button>
+            <span className="px-4 py-2 min-w-[60px] text-center select-none">
               {quantity}
             </span>
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              className="p-2 hover:bg-gray-100"
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() =>
+                setQuantity((prev) =>
+                  stockQuantity != null
+                    ? Math.min(stockQuantity, prev + 1)
+                    : prev + 1
+                )
+              }
+              disabled={stockQuantity != null && quantity >= stockQuantity}
+              className="rounded-none"
             >
               <Plus className="w-4 h-4" />
-            </button>
+            </Button>
           </div>
-          {stockQuantity && (
+          {stockQuantity != null && (
             <span className="text-sm text-muted-foreground">
               {stockQuantity} in stock
             </span>
@@ -179,9 +198,14 @@ export const ProductContent = ({ product }: ProductContentProps) => {
 
       {/* Action Buttons */}
       <div className="flex gap-3">
-        <Button size="lg" className="flex-1" onClick={handleAddToCart}>
+        <Button
+          size="lg"
+          className="flex-1"
+          onClick={handleAddToCart}
+          disabled={stockQuantity === 0}
+        >
           <ShoppingCart className="w-5 h-5 mr-2" />
-          Add to Cart
+          {stockQuantity === 0 ? "Out of Stock" : "Add to Cart"}
         </Button>
         <Button
           variant="outline"

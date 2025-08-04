@@ -108,7 +108,7 @@ export const productSchema = z.object({
     .preprocess((val) => {
       if (val === "" || val === null || val === undefined) return undefined;
       return Number(val);
-    }, z.number().positive("Must be a positive number").optional())
+    }, z.number().nonnegative("Stock cannot be negative").optional())
     .optional(),
 
   productWeight: z
