@@ -17,11 +17,12 @@ import { trpc } from "@/server/client";
 import { toast } from "sonner";
 import { AlertConfirmation } from "../AlertConfirmation";
 import { useRouter } from "next/navigation";
+import { Loading } from "../Loading";
 
 export const OrderInfo = () => {
   const { data: session } = useSession();
   const router = useRouter();
-  const { cart, cartCount, cartTotal, clearCart } = useCart();
+  const { cart, cartCount, cartTotal, clearCart, isLoading } = useCart();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const initiateEsewaPayment =
     trpc.paymentRouter.initiateEsewaPayment.useMutation();
@@ -71,7 +72,7 @@ export const OrderInfo = () => {
       // createOrder(enrichedData);
       localStorage.setItem("pendingOrder", JSON.stringify(enrichedData));
       if (data.paymentMethod === "cash") {
-        router.push("/success");
+        router.push("/success?payment=cash");
         return;
       }
 
@@ -105,6 +106,10 @@ export const OrderInfo = () => {
       setIsSubmitting(false);
     }
   };
+
+  if (isLoading) {
+    return <Loading className="h-[70vh]" />;
+  }
   return (
     <div className="">
       <form className="py-4" action="" onSubmit={handleSubmit(onSubmit)}>

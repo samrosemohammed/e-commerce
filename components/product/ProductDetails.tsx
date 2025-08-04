@@ -6,6 +6,7 @@ import { ProductContent } from "./ProductContent";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, TriangleAlert } from "lucide-react";
+import { Loading } from "../Loading";
 
 interface ProductDetailsProps {
   id: string;
@@ -16,11 +17,7 @@ export const ProductDetails = ({ id }: ProductDetailsProps) => {
     trpc.userRouter.getProductById.useQuery({ id });
 
   if (isLoading) {
-    return (
-      <div className="min-h-[70vh] max-w-screen-md mx-auto flex items-center justify-center">
-        <Loader2 className="animate-spin w-16 h-16 text-muted-foreground" />
-      </div>
-    );
+    return <Loading />;
   }
 
   if (!productData) {

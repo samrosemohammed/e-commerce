@@ -12,12 +12,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
+import { Loading } from "../Loading";
 
 export const OrderTable = () => {
   const { data: orderData, isLoading } = trpc.userRouter.getOrder.useQuery();
 
   if (isLoading) {
-    return <p className="text-center py-8">Loading orders...</p>;
+    return <Loading />;
   }
 
   if (!orderData || orderData.length === 0) {

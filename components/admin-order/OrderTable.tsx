@@ -14,17 +14,7 @@ export const CustomerOrderTable = () => {
     isError,
   } = trpc.adminRouter.getOrderByCustomer.useQuery();
   console.log("data: ", customerOrderData);
-  //   const { mutate: deleteProducts } = trpc.adminRouter.deleteProduct.useMutation(
-  //     {
-  //       onSuccess: () => {
-  //         toast.success("Products deleted");
-  //         utils.adminRouter.getProduct.invalidate();
-  //       },
-  //       onError: () => {
-  //         toast.error("Failed to delete products");
-  //       },
-  //     }
-  //   );
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40">

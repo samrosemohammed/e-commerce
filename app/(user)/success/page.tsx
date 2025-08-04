@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { trpc } from "@/server/client";
 import { useCart } from "@/context/CartContext";
@@ -17,6 +17,7 @@ export default function SuccessPage() {
   const { cart, cartCount, cartTotal, clearCart } = useCart();
   const [loading, setLoading] = useState(true);
   const [orderCreated, setOrderCreated] = useState(false);
+  const hasRunRef = useRef(false);
 
   const createOrder = trpc.userRouter.createOrder.useMutation({
     onSuccess: () => {
@@ -34,7 +35,26 @@ export default function SuccessPage() {
   });
 
   useEffect(() => {
+    if (hasRunRef.current) return;
+    hasRunRef.current = true;
+
     const encodedData = searchParams.get("data");
+    const paymentType = searchParams.get("payment");
+
+    if (paymentType === "cash") {
+      const storedOrder = localStorage.getItem("pendingOrder");
+      if (!storedOrder) {
+        toast.error("No order data found.");
+        router.push("/");
+        return;
+      }
+
+      const orderData = JSON.parse(storedOrder);
+
+      createOrder.mutate(orderData);
+
+      return;
+    }
 
     if (!encodedData) {
       toast.error("Missing payment confirmation.");
@@ -62,11 +82,7 @@ export default function SuccessPage() {
 
       const orderData = JSON.parse(storedOrder);
 
-      createOrder.mutate(orderData, {
-        onSuccess: () => {
-          localStorage.removeItem("pendingOrder");
-        },
-      });
+      createOrder.mutate(orderData);
     } catch (err) {
       console.error("Failed to process eSewa response:", err);
       toast.error("Could not verify payment.");
