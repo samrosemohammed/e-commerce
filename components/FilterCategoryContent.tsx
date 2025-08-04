@@ -80,7 +80,7 @@ export const FilterCategoryContent = () => {
     },
   ];
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading className="h-[76vh]" />;
 
   return (
     <div>

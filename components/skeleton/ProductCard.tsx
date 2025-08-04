@@ -12,9 +12,9 @@ export const SkeletonProductCard = ({ view }: SkeletongProductCardProps) => {
         {skeletonArray.map((_, i) => (
           <div
             key={i}
-            className="border rounded-lg p-4 space-y-4 animate-pulse"
+            className="border rounded-lg p-3 space-y-3 animate-pulse"
           >
-            <Skeleton className="w-full h-64 rounded-md" />
+            <Skeleton className="w-full h-56 rounded-md" />
             <Skeleton className="h-6 w-3/4" />
             <Skeleton className="h-6 w-1/2" />
             <div className="flex gap-2">

@@ -13,6 +13,10 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Loading } from "../Loading";
+import { EmptyState } from "../Empty";
+import { ShoppingBag, ShoppingCart } from "lucide-react";
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 export const OrderTable = () => {
   const { data: orderData, isLoading } = trpc.userRouter.getOrder.useQuery();
@@ -22,9 +26,25 @@ export const OrderTable = () => {
   }
 
   if (!orderData || orderData.length === 0) {
-    return <p className="text-center py-8">No orders found.</p>;
+    return (
+      <div className="space-y-6">
+        <h1 className="font-semibold text-2xl">My Orders</h1>
+        <EmptyState
+          title="No orders found"
+          description="You haven't placed any orders yet. Start shopping to see your orders here."
+          icon={<ShoppingCart className="w-12 h-12 text-gray-400" />}
+          action={
+            <Button asChild>
+              <Link href={"/"}>
+                <ShoppingBag />
+                Continue shopping
+              </Link>
+            </Button>
+          }
+        />
+      </div>
+    );
   }
-
   return (
     <div className="space-y-6">
       <h1 className="font-semibold text-2xl">My Orders</h1>

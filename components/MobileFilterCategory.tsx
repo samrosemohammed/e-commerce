@@ -21,30 +21,6 @@ import { useState } from "react";
 import { FilterCategoryContent } from "./FilterCategoryContent";
 
 export const MobileFilterCategory = () => {
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
-
-  const categories = [
-    {
-      title: "Trending",
-      items: ["New Arrivals", "Sale", "Discount"],
-    },
-    {
-      title: "Gender",
-      items: ["Male", "Female", "Kids", "Others"],
-    },
-    {
-      title: "Clothes",
-      items: ["T-shirt", "Pant", "Jacket", "Hoody"],
-    },
-    {
-      title: "Brand",
-      items: ["Gucci", "Nike", "Addidas", "BooyForce"],
-    },
-    {
-      title: "Availability",
-      items: ["On-Stock", "Out of Stock"],
-    },
-  ];
   return (
     <Sheet>
       <SheetTrigger>
