@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -9,39 +9,91 @@ import {
 import { Checkbox } from "./ui/checkbox";
 import { Label } from "./ui/label";
 import { Slider } from "./ui/slider";
+import { Button } from "./ui/button";
+import { trpc } from "@/server/client";
+import { Loading } from "./Loading";
+import { capitalizeWords } from "@/lib/utils";
+import { useFilters } from "@/context/FilterContext";
+import { Badge } from "./ui/badge";
 
 export const FilterCategoryContent = () => {
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 500]);
+  const { filters, updateFilter, resetFilters } = useFilters();
+  const { data: filterOptions, isLoading } =
+    trpc.userRouter.getFilters.useQuery();
+  const [localPriceRange, setLocalPriceRange] = useState<[number, number]>(
+    filters.priceRange
+  );
+
+  // Update local price range when filters change
+  useEffect(() => {
+    setLocalPriceRange(filters.priceRange);
+  }, [filters.priceRange]);
+
+  const handleCheckboxChange = (
+    filterKey: keyof typeof filters,
+    value: string,
+    checked: boolean
+  ) => {
+    const currentValues = filters[filterKey] as string[];
+    const newValues = checked
+      ? [...currentValues, value]
+      : currentValues.filter((item) => item !== value);
+
+    updateFilter(filterKey, newValues);
+  };
+
+  const handlePriceRangeChange = (value: [number, number]) => {
+    setLocalPriceRange(value);
+    // Debounce the price update to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      updateFilter("priceRange", value);
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  };
 
   const categories = [
     {
       title: "Trending",
-      items: ["New Arrivals", "Sale", "Discount"],
+      items: filterOptions?.tags,
+      filterKey: "tags" as const,
     },
     {
       title: "Gender",
-      items: ["Male", "Female", "Kids", "Others"],
+      items: filterOptions?.genders,
+      filterKey: "genders" as const,
     },
     {
       title: "Clothes",
-      items: ["T-shirt", "Pant", "Jacket", "Hoody"],
+      items: filterOptions?.categories,
+      filterKey: "categories" as const,
     },
     {
       title: "Brand",
-      items: ["Gucci", "Nike", "Addidas", "BooyForce"],
+      items: filterOptions?.brands,
+      filterKey: "brands" as const,
     },
     {
       title: "Availability",
-      items: ["On-Stock", "Out of Stock"],
+      items: filterOptions?.availability,
+      filterKey: "availability" as const,
     },
   ];
+
+  if (isLoading) return <Loading />;
+
   return (
     <div>
-      <h2 className="text-lg font-semibold mb-4">Filter by Category</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg font-semibold">Filter by Category</h2>
+        <Button variant="outline" size="xs" onClick={resetFilters}>
+          Clear All
+        </Button>
+      </div>
 
       <Accordion
         type="multiple"
-        className="w-full"
+        className="w-full max-h-[650px]"
         defaultValue={[
           "trending",
           "gender",
@@ -57,24 +109,40 @@ export const FilterCategoryContent = () => {
             value={section.title.toLowerCase()}
           >
             <AccordionTrigger className="text-base font-medium">
-              {section.title}
+              <p className="flex gap-2 items-center">
+                {section.title}
+                {filters[section.filterKey].length > 0 && (
+                  <Badge variant={"secondary"} className="rounded-full">
+                    {filters[section.filterKey].length}
+                  </Badge>
+                )}
+              </p>
             </AccordionTrigger>
-            <AccordionContent>
-              <div className="grid grid-cols-2 gap-3 pt-2">
-                {section.items.map((item) => (
+            <AccordionContent className="max-h-[200px] overflow-y-auto pr-2">
+              <div className="grid grid-cols-1 gap-3 pt-2">
+                {section?.items?.map((item) => (
                   <Label
                     key={item}
                     className="flex items-center gap-2 font-normal cursor-pointer hover:text-foreground/80"
                   >
-                    <Checkbox />
-                    {item}
+                    <Checkbox
+                      checked={filters[section.filterKey].includes(item!)}
+                      onCheckedChange={(checked) =>
+                        handleCheckboxChange(
+                          section.filterKey,
+                          item!,
+                          checked as boolean
+                        )
+                      }
+                    />
+                    {capitalizeWords(item!)}
                   </Label>
                 ))}
               </div>
             </AccordionContent>
           </AccordionItem>
         ))}
-        {/* Price range filter */}
+
         <AccordionItem value="price">
           <AccordionTrigger className="text-base font-medium">
             Price
@@ -82,18 +150,15 @@ export const FilterCategoryContent = () => {
           <AccordionContent>
             <div className="pt-4">
               <Slider
-                defaultValue={priceRange}
-                min={0}
-                max={1000}
+                min={filterOptions?.priceRange[0] || 0}
+                max={filterOptions?.priceRange[1] || 1000}
                 step={10}
-                value={priceRange}
-                onValueChange={(value: [number, number]) =>
-                  setPriceRange(value)
-                }
+                value={localPriceRange}
+                onValueChange={handlePriceRangeChange}
               />
               <div className="flex justify-between text-sm mt-2 text-muted-foreground">
-                <span>${priceRange[0]}</span>
-                <span>${priceRange[1]}</span>
+                <span>${localPriceRange[0]}</span>
+                <span>${localPriceRange[1]}</span>
               </div>
             </div>
           </AccordionContent>

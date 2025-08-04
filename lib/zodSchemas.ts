@@ -170,3 +170,16 @@ export const orderSchema = z.object({
 
 export type OrderFormData = z.infer<typeof orderFormSchema>;
 export type OrderData = z.infer<typeof orderSchema>;
+
+export const filterInputSchema = z.object({
+  categories: z.array(z.string()).optional(),
+  brands: z.array(z.string()).optional(),
+  genders: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  availability: z.array(z.string()).optional(),
+  priceMin: z.number().optional(),
+  priceMax: z.number().optional(),
+  sortBy: z
+    .enum(["default", "price-asc", "price-desc", "name-asc", "name-desc"])
+    .optional(),
+});

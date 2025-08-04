@@ -2,6 +2,8 @@
 import { Product } from "@/types/product";
 import { Badge } from "../ui/badge";
 import {
+  ChevronDown,
+  ChevronUp,
   Copy,
   Heart,
   Minus,
@@ -44,10 +46,19 @@ export const ProductContent = ({ product }: ProductContentProps) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { data: session } = useSession();
   const router = useRouter();
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const discountPercentage = comparePrice
     ? Math.round(((comparePrice - price) / comparePrice) * 100)
     : 0;
+
+  const DESCRIPTION_CHAR_LIMIT = 150; // Adjust this value as needed
+  const shouldShowReadMore =
+    description && description.length > DESCRIPTION_CHAR_LIMIT;
+  const displayDescription =
+    shouldShowReadMore && !isDescriptionExpanded
+      ? description.substring(0, DESCRIPTION_CHAR_LIMIT) + "..."
+      : description;
 
   const handleLinkCopy = () => {
     navigator.clipboard.writeText(window.location.href);
@@ -117,8 +128,17 @@ export const ProductContent = ({ product }: ProductContentProps) => {
         )}
       </div>
 
-      <div className="text-muted-foreground leading-relaxed">{description}</div>
-
+      <div className="text-muted-foreground leading-relaxed space-y-2">
+        <p>{displayDescription}</p>
+        {shouldShowReadMore && (
+          <p
+            onClick={() => setIsDescriptionExpanded((prev) => !prev)}
+            className="text-sm hover:underline cursor-pointer"
+          >
+            {isDescriptionExpanded ? "Show less" : "Read more"}
+          </p>
+        )}
+      </div>
       {sizes.length > 0 && (
         <div>
           <h3 className="font-semibold mb-3">Size</h3>

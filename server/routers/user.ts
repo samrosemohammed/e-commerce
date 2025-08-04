@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
-import { orderSchema } from "@/lib/zodSchemas";
+import { filterInputSchema, orderSchema } from "@/lib/zodSchemas";
 
 export const userRouter = router({
   createOrder: protectedProcedure
@@ -124,4 +124,136 @@ export const userRouter = router({
     });
     return order;
   }),
+  // In your userRouter or create a new filterRouter
+  getFilters: publicProcedure.query(async () => {
+    const categories = await prisma.category.findMany({
+      where: { status: "active" },
+      select: { name: true },
+    });
+
+    const brands = await prisma.brand.findMany({
+      where: { status: "active" },
+      select: { name: true },
+    });
+
+    const genders = await prisma.product.findMany({
+      select: { gender: true },
+      distinct: ["gender"],
+    });
+
+    const availability = await prisma.product.findMany({
+      select: { status: true },
+      distinct: ["status"],
+    });
+
+    const priceStats = await prisma.product.aggregate({
+      _min: { price: true },
+      _max: { price: true },
+    });
+
+    // Fetch all tags from all products
+    const allProductTags = await prisma.product.findMany({
+      select: { tags: true },
+    });
+
+    const tagSet = new Set<string>();
+    allProductTags.forEach((product) => {
+      product.tags.forEach((tag) => tagSet.add(tag));
+    });
+
+    return {
+      categories: categories.map((c) => c.name),
+      brands: brands.map((b) => b.name),
+      genders: genders.map((g) => g.gender).filter(Boolean),
+      availability: availability.map((a) => a.status),
+      priceRange: [priceStats._min.price ?? 0, priceStats._max.price ?? 1000],
+      tags: Array.from(tagSet), // Add this
+    };
+  }),
+  getFilteredProducts: publicProcedure
+    .input(filterInputSchema)
+    .query(async ({ input }) => {
+      const {
+        categories,
+        brands,
+        genders,
+        tags,
+        availability,
+        priceMin,
+        priceMax,
+        sortBy = "default",
+      } = input;
+
+      // Build where clause dynamically
+      const whereClause: any = {};
+
+      // Category filter
+      if (categories && categories.length > 0) {
+        whereClause.category = {
+          name: { in: categories },
+        };
+      }
+
+      // Brand filter
+      if (brands && brands.length > 0) {
+        whereClause.brand = {
+          name: { in: brands },
+        };
+      }
+
+      // Gender filter
+      if (genders && genders.length > 0) {
+        whereClause.gender = { in: genders };
+      }
+
+      // Tags filter (array contains any of the selected tags)
+      if (tags && tags.length > 0) {
+        whereClause.tags = {
+          hasSome: tags,
+        };
+      }
+
+      // Availability filter
+      if (availability && availability.length > 0) {
+        whereClause.status = { in: availability };
+      }
+
+      // Price range filter
+      if (priceMin !== undefined || priceMax !== undefined) {
+        whereClause.price = {};
+        if (priceMin !== undefined) whereClause.price.gte = priceMin;
+        if (priceMax !== undefined) whereClause.price.lte = priceMax;
+      }
+
+      // Build orderBy clause
+      let orderBy: any = { name: "asc" }; // default
+
+      switch (sortBy) {
+        case "price-asc":
+          orderBy = { price: "asc" };
+          break;
+        case "price-desc":
+          orderBy = { price: "desc" };
+          break;
+        case "name-asc":
+          orderBy = { name: "asc" };
+          break;
+        case "name-desc":
+          orderBy = { name: "desc" };
+          break;
+        default:
+          orderBy = { name: "asc" };
+      }
+
+      const products = await prisma.product.findMany({
+        where: whereClause,
+        orderBy,
+        include: {
+          brand: { select: { name: true } },
+          category: { select: { name: true } },
+        },
+      });
+
+      return products;
+    }),
 });
