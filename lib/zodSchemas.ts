@@ -183,3 +183,32 @@ export const filterInputSchema = z.object({
     .enum(["default", "price-asc", "price-desc", "name-asc", "name-desc"])
     .optional(),
 });
+
+export const updateProfileSchema = z.object({
+  fullName: z
+    .string()
+    .min(1, { message: "Full Name is required" })
+    .max(100, { message: "Full Name is too long" }),
+
+  email: z
+    .string()
+    .min(1, { message: "Email is required" })
+    .email({ message: "Invalid email address" }),
+
+  phone: z
+    .string()
+    .min(7, { message: "Phone number is too short" })
+    .max(15, { message: "Phone number is too long" })
+    .regex(/^[0-9+\-() ]*$/, { message: "Invalid phone number format" }),
+
+  location: z
+    .string()
+    .min(1, { message: "Location is required" })
+    .max(100, { message: "Location is too long" }),
+
+  bio: z
+    .string()
+    .max(500, { message: "Bio must be less than 500 characters" })
+    .optional(),
+});
+export type UpdateProfileFormData = z.infer<typeof updateProfileSchema>;

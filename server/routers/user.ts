@@ -2,9 +2,40 @@ import { prisma } from "@/lib/prisma";
 import { protectedProcedure, publicProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 import z from "zod";
-import { filterInputSchema, orderSchema } from "@/lib/zodSchemas";
+import {
+  filterInputSchema,
+  orderSchema,
+  updateProfileSchema,
+} from "@/lib/zodSchemas";
 
 export const userRouter = router({
+  updateUser: protectedProcedure
+    .input(updateProfileSchema)
+    .mutation(async ({ input, ctx }) => {
+      const userId = ctx.user.id;
+
+      const updatedUser = await prisma.user.update({
+        where: { id: userId },
+        data: {
+          name: input.fullName,
+          email: input.email,
+          phone: input.phone,
+          location: input.location,
+          bio: input.bio,
+        },
+      });
+
+      return updatedUser;
+    }),
+  getUser: protectedProcedure.query(async ({ input, ctx }) => {
+    const userId = ctx.user.id;
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId,
+      },
+    });
+    return user;
+  }),
   createOrder: protectedProcedure
     .input(orderSchema)
     .mutation(async ({ input, ctx }) => {
