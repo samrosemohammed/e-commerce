@@ -9,32 +9,15 @@ import { Heart, ShoppingBag, ShoppingCart, Trash2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { capitalizeWords } from "@/lib/utils";
 import { Badge } from "../ui/badge";
+import { Loading } from "../Loading";
 
 export const GetWishList = () => {
-  const { wishlist, removeFromWishlist, isWishlisted } = useWishlist();
-  const { addToCart } = useCart();
+  const { wishlist, removeFromWishlist, isLoading } = useWishlist();
   const router = useRouter();
 
   const handleRemoveFromWishlist = (productId: string, productName: string) => {
     removeFromWishlist(productId);
     toast.success(`${productName} removed from wishlist`);
-  };
-
-  const handleAddToCart = (item: (typeof wishlist)[number]) => {
-    if (item.product.stockQuantity == null || item.product.stockQuantity <= 0) {
-      toast.warning(`${item.product.name} is out of stock`);
-      return;
-    }
-
-    const cartItem: CartItem = {
-      product: item.product,
-      quantity: 1,
-      selectedSize: undefined,
-      selectedColor: undefined,
-    };
-
-    addToCart(cartItem);
-    toast.success(`${item.product.name} added to cart`);
   };
 
   const handleRemove = (item: (typeof wishlist)[number]) => {
@@ -45,10 +28,15 @@ export const GetWishList = () => {
   const handleViewDetails = (item: (typeof wishlist)[number]) => {
     router.push(`/product/${item.product.id}`);
   };
+
   const totalValue = wishlist.reduce(
     (sum, item) => sum + item.product.price,
     0
   );
+
+  if (isLoading) {
+    return <Loading text="Loading your wishlist..." />;
+  }
 
   if (wishlist.length === 0) {
     return (
@@ -92,10 +80,6 @@ export const GetWishList = () => {
 
       {/* Wishlist Actions */}
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
-        <Button variant="outline" className="flex items-center gap-2">
-          <ShoppingCart className="h-4 w-4" />
-          Add All to Cart
-        </Button>
         <Button
           variant="outline"
           onClick={() => {
@@ -178,27 +162,9 @@ export const GetWishList = () => {
                     className="flex-1"
                     onClick={() => handleViewDetails(item)}
                   >
-                    View Details
+                    <ShoppingCart /> Add to Cart
                   </Button>
-                  <Button
-                    variant="outline"
-                    disabled={
-                      item.product.stockQuantity == null ||
-                      item.product.stockQuantity <= 0
-                    }
-                    onClick={() => handleAddToCart(item)}
-                  >
-                    <ShoppingCart />
-                    {item.product.stockQuantity == null ||
-                    item.product.stockQuantity <= 0
-                      ? " Out of Stock"
-                      : ""}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleRemove(item)}
-                    className="px-3"
-                  >
+                  <Button variant="outline" onClick={() => handleRemove(item)}>
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>

@@ -18,6 +18,7 @@ interface WishlistContextType {
   removeFromWishlist: (productId: string) => void;
   isWishlisted: (productId: string) => boolean;
   wishListCount: number;
+  isLoading: boolean;
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(
@@ -26,11 +27,12 @@ const WishlistContext = createContext<WishlistContextType | undefined>(
 
 export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
-
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   // Optional: persist to localStorage
   useEffect(() => {
     const stored = localStorage.getItem("wishlist");
     if (stored) setWishlist(JSON.parse(stored));
+    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -61,6 +63,7 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
         removeFromWishlist,
         isWishlisted,
         wishListCount: wishlist.length,
+        isLoading,
       }}
     >
       {children}
