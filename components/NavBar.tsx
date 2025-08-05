@@ -6,6 +6,7 @@ import { UserDropDown } from "./UserDropDown";
 import { ThemeToggle } from "./ThemeToggle";
 import { useCart } from "@/context/CartContext";
 import { NavShoppingCartIcon } from "./NavShoppingCartIcon";
+import { NavWishList } from "./NavWishList";
 
 export const NavBar = () => {
   return (
@@ -22,6 +23,7 @@ export const NavBar = () => {
             />
           </div>
           <NavShoppingCartIcon />
+          <NavWishList />
           <ThemeToggle />
           <UserDropDown />
         </ul>

@@ -231,11 +231,15 @@ export const ProductContent = ({ product }: ProductContentProps) => {
         <Button
           variant="outline"
           size="lg"
-          onClick={() =>
-            isWishlisted(product.id)
-              ? removeFromWishlist(product.id)
-              : addToWishlist(product)
-          }
+          onClick={() => {
+            if (isWishlisted(product.id)) {
+              removeFromWishlist(product.id);
+              toast.success(`${product.name} removed from wishlist`);
+            } else {
+              addToWishlist(product);
+              toast.success(`${product.name} added to wishlist`);
+            }
+          }}
         >
           <Heart
             className={`w-5 h-5 ${

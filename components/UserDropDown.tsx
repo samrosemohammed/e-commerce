@@ -45,12 +45,6 @@ export const UserDropDown = async () => {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/wishlist" className="flex items-center gap-2">
-                <Heart className="w-4 h-4" />
-                Wishlist
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
               <Link href="/settings" className="flex items-center gap-2">
                 <Settings className="w-4 h-4" />
                 Settings

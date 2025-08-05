@@ -1,5 +1,5 @@
 "use client";
-import { useCart } from "@/context/CartContext";
+import { CartItem, useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -13,7 +13,6 @@ import { Badge } from "../ui/badge";
 export const GetWishList = () => {
   const { wishlist, removeFromWishlist, isWishlisted } = useWishlist();
   const { addToCart } = useCart();
-  const { data: session } = useSession();
   const router = useRouter();
 
   const handleRemoveFromWishlist = (productId: string, productName: string) => {
@@ -21,6 +20,31 @@ export const GetWishList = () => {
     toast.success(`${productName} removed from wishlist`);
   };
 
+  const handleAddToCart = (item: (typeof wishlist)[number]) => {
+    if (item.product.stockQuantity == null || item.product.stockQuantity <= 0) {
+      toast.warning(`${item.product.name} is out of stock`);
+      return;
+    }
+
+    const cartItem: CartItem = {
+      product: item.product,
+      quantity: 1,
+      selectedSize: undefined,
+      selectedColor: undefined,
+    };
+
+    addToCart(cartItem);
+    toast.success(`${item.product.name} added to cart`);
+  };
+
+  const handleRemove = (item: (typeof wishlist)[number]) => {
+    removeFromWishlist(item.product.id);
+    toast.success(`${item.product.name} removed from wishlist`);
+  };
+
+  const handleViewDetails = (item: (typeof wishlist)[number]) => {
+    router.push(`/product/${item.product.id}`);
+  };
   const totalValue = wishlist.reduce(
     (sum, item) => sum + item.product.price,
     0
@@ -150,18 +174,29 @@ export const GetWishList = () => {
 
                 {/* Action Buttons */}
                 <div className="flex gap-2">
-                  <Button className="flex-1">View Details</Button>
-                  <Button variant={"outline"}>
-                    <ShoppingCart />
+                  <Button
+                    className="flex-1"
+                    onClick={() => handleViewDetails(item)}
+                  >
+                    View Details
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() =>
-                      handleRemoveFromWishlist(
-                        item.product.id,
-                        item.product.name
-                      )
+                    disabled={
+                      item.product.stockQuantity == null ||
+                      item.product.stockQuantity <= 0
                     }
+                    onClick={() => handleAddToCart(item)}
+                  >
+                    <ShoppingCart />
+                    {item.product.stockQuantity == null ||
+                    item.product.stockQuantity <= 0
+                      ? " Out of Stock"
+                      : ""}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => handleRemove(item)}
                     className="px-3"
                   >
                     <Trash2 className="h-4 w-4" />

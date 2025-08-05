@@ -227,14 +227,29 @@ export const ProductCard = () => {
                 </div>
                 <div className="flex-1 p-6">
                   {product.tags && product.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                      {product.tags.slice(0, 3).map((tag, index) => (
-                        <Badge key={index} variant="secondary">
-                          {capitalizeWords(tag)}
-                        </Badge>
-                      ))}
+                    <div className="flex justify-between items-center">
+                      <div className="flex flex-wrap gap-2">
+                        {product.tags.slice(0, 3).map((tag, index) => (
+                          <Badge key={index} variant="secondary">
+                            {capitalizeWords(tag)}
+                          </Badge>
+                        ))}
+                      </div>
+                      <button
+                        className="bg-white  text-black rounded-full p-2 shadow"
+                        onClick={(e) => toggleWishlist(e, product)}
+                      >
+                        <Heart
+                          className={`w-4 h-4 ${
+                            isWishlisted(product.id) && session?.user.id
+                              ? "fill-red-500 text-red-500"
+                              : ""
+                          }`}
+                        />
+                      </button>
                     </div>
                   )}
+
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between h-full">
                     <div className="flex-1 space-y-2 mb-4 sm:mb-0">
                       <h2 className="text-xl font-semibold">{product.name}</h2>
