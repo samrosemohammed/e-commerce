@@ -1,4 +1,5 @@
 import {
+  BanknoteArrowDown,
   Calendar,
   ChevronUp,
   Home,
@@ -29,6 +30,7 @@ import {
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { LogOutDropDownItem } from "./LogOutButton";
+import { Separator } from "./ui/separator";
 
 // Menu items.
 const items = [
@@ -59,7 +61,7 @@ const items = [
   },
   {
     title: "Settings",
-    url: "#",
+    url: "admin-settings",
     icon: Settings,
   },
 ];
@@ -88,6 +90,7 @@ export const AppSideBar = async () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <Separator />
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -100,13 +103,19 @@ export const AppSideBar = async () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 side="top"
-                className="w-[--radix-popper-anchor-width]"
+                className="w-[var(--radix-popper-anchor-width)]"
               >
-                <DropdownMenuItem>
-                  <span>Account</span>
+                <DropdownMenuItem asChild>
+                  <Link href={"/admin-settings"}>
+                    <User2 />
+                    Account
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
-                  <span>Billing</span>
+                  <Link href={"/admin-billing"} className="flex gap-2">
+                    <BanknoteArrowDown />
+                    Billing
+                  </Link>
                 </DropdownMenuItem>
                 <LogOutDropDownItem />
               </DropdownMenuContent>

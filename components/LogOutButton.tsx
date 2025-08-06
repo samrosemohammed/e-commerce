@@ -45,7 +45,7 @@ export const LogOutDropDownItem = () => {
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction disabled={isLoading} onClick={handleLogOut}>
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-              {isLoading ? "Loggin Out.." : "Continue"}
+              {isLoading ? "Logging Out.." : "Continue"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

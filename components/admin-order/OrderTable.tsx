@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { DataTable } from "../DataTable";
 import { toast } from "sonner";
 import { customerOrderColumns } from "./Columns";
+import { Loading } from "../Loading";
 
 export const CustomerOrderTable = () => {
   const utils = trpc.useUtils();
@@ -15,13 +16,7 @@ export const CustomerOrderTable = () => {
   } = trpc.adminRouter.getOrderByCustomer.useQuery();
   console.log("data: ", customerOrderData);
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-40">
-        <Loader2 className="animate-spin size-8 text-muted-foreground" />
-      </div>
-    );
-  }
+  if (isLoading) return <Loading className="h-[75vh]" />;
 
   if (isError || !customerOrderData) {
     return (

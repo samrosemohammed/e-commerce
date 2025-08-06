@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 import { DataTable } from "../DataTable";
 import { productColumns } from "./Columns";
 import { toast } from "sonner";
+import { Loading } from "../Loading";
 
 export const ProductTable = () => {
   const utils = trpc.useUtils();
@@ -24,13 +25,7 @@ export const ProductTable = () => {
       },
     }
   );
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-40">
-        <Loader2 className="animate-spin size-8 text-muted-foreground" />
-      </div>
-    );
-  }
+  if (isLoading) return <Loading className="h-[70vh]" />;
 
   if (isError || !productData) {
     return (
