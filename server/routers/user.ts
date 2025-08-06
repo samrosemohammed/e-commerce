@@ -5,10 +5,51 @@ import z from "zod";
 import {
   filterInputSchema,
   orderSchema,
+  updatePasswordSchema,
   updateProfileSchema,
 } from "@/lib/zodSchemas";
+import { hashPassword, validatePassword } from "@/lib/utils";
 
 export const userRouter = router({
+  updatePassword: protectedProcedure
+    .input(updatePasswordSchema)
+    .mutation(async ({ input, ctx }) => {
+      const { currentPassword, newPassword } = input;
+      const userId = ctx.user.id;
+
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+      });
+
+      if (!user || !user.hashedPassword) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "User not found or password not set.",
+        });
+      }
+
+      const isValid = await validatePassword(
+        currentPassword,
+        user.hashedPassword
+      );
+      if (!isValid) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Current password is incorrect.",
+        });
+      }
+
+      const hashedNewPassword = await hashPassword(newPassword, 10);
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          hashedPassword: hashedNewPassword,
+        },
+      });
+
+      return { message: "Password updated successfully." };
+    }),
   updateUser: protectedProcedure
     .input(updateProfileSchema)
     .mutation(async ({ input, ctx }) => {

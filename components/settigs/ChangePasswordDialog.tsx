@@ -12,31 +12,43 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { UpdatePasswordFormData, updatePasswordSchema } from "@/lib/zodSchemas";
+import { trpc } from "@/server/client";
+import { toast } from "sonner";
 
 export function ChangePasswordDialog() {
   const [open, setOpen] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const { mutate: updatePasswordMutation, isPending } =
+    trpc.userRouter.updatePassword.useMutation({
+      onSuccess: () => {
+        setOpen(false);
+        reset();
+        toast.success("Password updated successfully.");
+      },
+      onError: (err) => {
+        toast.error(err.message);
+      },
+    });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<UpdatePasswordFormData>({
+    resolver: zodResolver(updatePasswordSchema),
+  });
 
-    if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
-      return;
-    }
-
-    // TODO: handle actual password change logic here
-    console.log("Change password", { currentPassword, newPassword });
-
-    setError("");
-    setOpen(false);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+  const onSubmit = (data: UpdatePasswordFormData) => {
+    updatePasswordMutation(data);
   };
 
   return (
@@ -52,44 +64,93 @@ export function ChangePasswordDialog() {
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          {/* Current Password */}
           <div className="space-y-2">
-            <Label htmlFor="current">Current Password</Label>
-            <Input
-              id="current"
-              type="password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              required
-            />
+            <Label htmlFor="currentPassword">Current Password</Label>
+            <div className="relative">
+              <Input
+                id="currentPassword"
+                type={showCurrent ? "text" : "password"}
+                {...register("currentPassword")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrent(!showCurrent)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                tabIndex={-1}
+              >
+                {showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.currentPassword && (
+              <p className="text-sm text-red-500">
+                {errors.currentPassword.message}
+              </p>
+            )}
           </div>
 
+          {/* New Password */}
           <div className="space-y-2">
-            <Label htmlFor="new">New Password</Label>
-            <Input
-              id="new"
-              type="password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              required
-            />
+            <Label htmlFor="newPassword">New Password</Label>
+            <div className="relative">
+              <Input
+                id="newPassword"
+                type={showNew ? "text" : "password"}
+                {...register("newPassword")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowNew(!showNew)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                tabIndex={-1}
+              >
+                {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.newPassword && (
+              <p className="text-sm text-red-500">
+                {errors.newPassword.message}
+              </p>
+            )}
           </div>
 
+          {/* Confirm Password */}
           <div className="space-y-2">
-            <Label htmlFor="confirm">Confirm New Password</Label>
-            <Input
-              id="confirm"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
+            <Label htmlFor="confirmPassword">Confirm New Password</Label>
+            <div className="relative">
+              <Input
+                id="confirmPassword"
+                type={showConfirm ? "text" : "password"}
+                {...register("confirmPassword")}
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm(!showConfirm)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                tabIndex={-1}
+              >
+                {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="text-sm text-red-500">
+                {errors.confirmPassword.message}
+              </p>
+            )}
           </div>
-
-          {error && <p className="text-sm text-red-500">{error}</p>}
 
           <DialogFooter>
-            <Button type="submit">Save</Button>
+            <Button type="submit" disabled={isPending}>
+              {isPending ? (
+                <>
+                  <Loader2 className="animate-spin w-4 h-4" />
+                  Saving...
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

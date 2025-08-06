@@ -18,6 +18,7 @@ import { UpdateProfileFormData, updateProfileSchema } from "@/lib/zodSchemas";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useEffect } from "react";
+import { Loading } from "../Loading";
 
 export const UpdateProfile = () => {
   const utils = trpc.useUtils();
@@ -60,6 +61,8 @@ export const UpdateProfile = () => {
   const onSubmit = (data: UpdateProfileFormData) => {
     updateUser(data);
   };
+
+  if (isUserLoading) return <Loading className="h-[60vh] border rounded-lg" />;
 
   return (
     <Card>
@@ -124,7 +127,9 @@ export const UpdateProfile = () => {
             <Label htmlFor="bio">Bio</Label>
             <Textarea
               id="bio"
-              placeholder={userData?.bio ?? "Tell us about yourself"}
+              placeholder={
+                userData?.bio ? userData?.bio : "Tell us about yourself"
+              }
               rows={4}
               {...register("bio")}
             />
@@ -142,7 +147,7 @@ export const UpdateProfile = () => {
             <Button type="submit" disabled={isPending || isUserLoading}>
               {isPending ? (
                 <>
-                  <Loader2 className="animate-spin w-4 h-4 mr-2" />
+                  <Loader2 className="animate-spin w-4 h-4" />
                   Saving...
                 </>
               ) : (

@@ -22,9 +22,10 @@ import { format } from "date-fns";
 import { capitalizeWords } from "@/lib/utils";
 import { Button } from "../ui/button";
 import { ChangePasswordDialog } from "./ChangePasswordDialog";
+import { Loading } from "../Loading";
 
 export const ProfileInfo = () => {
-  const { data: userData } = trpc.userRouter.getUser.useQuery();
+  const { data: userData, isLoading } = trpc.userRouter.getUser.useQuery();
 
   const displayName = userData?.name || "---";
   const initials = userData?.name
@@ -45,6 +46,7 @@ export const ProfileInfo = () => {
     ? format(new Date(userData?.createdAt), "MMMM yyyy")
     : "---";
   const badge = userData?.role === "user" ? "Buyer" : "Seller";
+  if (isLoading) return <Loading className="h-[50vh] border rounded-lg" />;
 
   return (
     <div className="space-y-4">

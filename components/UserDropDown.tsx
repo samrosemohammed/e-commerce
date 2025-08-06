@@ -33,12 +33,6 @@ export const UserDropDown = async () => {
         {session?.user ? (
           <>
             <DropdownMenuItem asChild>
-              <Link href="/profile" className="flex items-center gap-2">
-                <UserCircle className="w-4 h-4" />
-                My Profile
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
               <Link href="/order" className="flex items-center gap-2">
                 <ShoppingBag className="w-4 h-4" />
                 My Orders
