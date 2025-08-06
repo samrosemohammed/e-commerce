@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Heart,
   HelpCircle,
@@ -16,21 +18,24 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Link from "next/link";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/authOptions";
+import { useSession } from "next-auth/react";
 import { LogOutDropDownItem } from "./LogOutButton";
 
-export const UserDropDown = async () => {
-  const session = await getServerSession(authOptions);
+export const UserDropDown = () => {
+  const { data: session, status } = useSession();
+
+  const isLoading = status === "loading";
+  const isLoggedIn = !!session?.user;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost">
+        <Button variant="ghost" disabled={isLoading}>
           <User />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        {session?.user ? (
+        {isLoggedIn ? (
           <>
             <DropdownMenuItem asChild>
               <Link href="/order" className="flex items-center gap-2">

@@ -19,6 +19,7 @@ import { useState } from "react";
 import { LoginFormData, loginSchema } from "@/lib/zodSchemas";
 import { useRouter } from "next/navigation";
 import bcrypt from "bcryptjs";
+import { toast } from "sonner";
 
 export default function Page() {
   const [showPassword, setShowPassword] = useState(false);
@@ -49,7 +50,7 @@ export default function Page() {
         router.push("/");
       }
     } else {
-      console.log("Invalid email or password");
+      toast.error("Invalid email or password");
     }
   };
 
