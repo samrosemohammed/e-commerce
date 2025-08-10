@@ -1,10 +1,8 @@
 import Link from "next/link";
-import { Button } from "./ui/button";
-import { Search, ShoppingCart, User } from "lucide-react";
+import { Search } from "lucide-react";
 import { Input } from "./ui/input";
 import { UserDropDown } from "./UserDropDown";
 import { ThemeToggle } from "./ThemeToggle";
-import { useCart } from "@/context/CartContext";
 import { NavShoppingCartIcon } from "./NavShoppingCartIcon";
 import { NavWishList } from "./NavWishList";
 

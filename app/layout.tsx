@@ -9,7 +9,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { CartProvider } from "@/context/CartContext";
 import { WishlistProvider } from "@/context/WishlistContext";
-import { ClientNavBarWrapper } from "@/components/ClientNavBarWrapper";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -27,6 +26,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await getServerSession(authOptions);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${poppins.className} antialiased`}>
@@ -39,9 +40,7 @@ export default async function RootLayout({
           <Provider>
             <CartProvider>
               <WishlistProvider>
-                <ClientNavBarWrapper />
-
-                {/* <NavBar /> */}
+                <NavBar />
                 {children}
               </WishlistProvider>
             </CartProvider>

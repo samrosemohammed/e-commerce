@@ -2,10 +2,17 @@
 import { CartItem, useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { notFound, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { EmptyState } from "../Empty";
-import { Heart, ShoppingBag, ShoppingCart, Trash2 } from "lucide-react";
+import {
+  Ban,
+  Heart,
+  LogIn,
+  ShoppingBag,
+  ShoppingCart,
+  Trash2,
+} from "lucide-react";
 import { Button } from "../ui/button";
 import { capitalizeWords } from "@/lib/utils";
 import { Badge } from "../ui/badge";
@@ -13,6 +20,7 @@ import { Loading } from "../Loading";
 
 export const GetWishList = () => {
   const { wishlist, removeFromWishlist, isLoading } = useWishlist();
+  const { data: session } = useSession();
   const router = useRouter();
 
   const handleRemoveFromWishlist = (productId: string, productName: string) => {
@@ -34,6 +42,33 @@ export const GetWishList = () => {
     0
   );
 
+  if (!session) {
+    return (
+      <div className="space-y-6 max-w-screen-2xl mx-auto py-6 sm:px-0 px-2">
+        <EmptyState
+          title="Please log in to view your wishlist"
+          description="Sign in to save the items you love, track them easily, and get alerts when prices drop."
+          className="min-h-[85vh]"
+          icon={
+            <div className="bg-muted/20 rounded-full p-6">
+              <Ban className="h-12 w-12 text-muted-foreground" />
+            </div>
+          }
+          action={
+            <div className="space-x-2">
+              <Button onClick={() => router.push("/login")}>
+                <LogIn className="h-4 w-4 mr-2" /> Login In
+              </Button>
+              <Button variant={"ghost"} onClick={() => router.push("/")}>
+                <ShoppingBag className="h-4 w-4 mr-2" />
+                Continue Shopping
+              </Button>
+            </div>
+          }
+        />
+      </div>
+    );
+  }
   if (isLoading) {
     return <Loading text="Loading your wishlist..." />;
   }
